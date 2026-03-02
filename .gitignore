@@ -1,0 +1,16 @@
+# virtual env
+.venv/
+venv/
+pr_env/
+
+# cache
+__pycache__/
+*.pyc
+
+# local index files
+data/index.faiss
+data/meta.json
+data/manifest.json
+
+# other
+.env
