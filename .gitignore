@@ -1,0 +1,9 @@
+.venv/
+.venv311/
+.env
+__pycache__/
+*.pyc
+.DS_Store
+data/index.faiss
+data/meta.json
+data/new_docs/

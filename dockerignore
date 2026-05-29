@@ -1,0 +1,17 @@
+.venv/
+.venv311/
+.git/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+
+# 真实数据不进镜像
+data/index.faiss
+data/meta.json
+data/new_docs/
+
+# 部署不需要的东西
+tests/
+streamlit_app.py
+assets/
