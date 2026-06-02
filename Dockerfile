@@ -13,11 +13,14 @@ ENV HOME=/home/user \
 
 WORKDIR $HOME/app
 
+# 国内服务器构建用镜像，避免连 huggingface.co / PyPI 超时
+ENV HF_ENDPOINT=https://hf-mirror.com
+
 # 先装依赖（利用缓存层）
 COPY --chown=user requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --user -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
-# 把 embedding 模型预先下载烤进镜像，首次访问就不用等下载
+# 把 embedding 模型预先下载烤进镜像（走 hf-mirror 镜像），首次访问就不用等下载
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-zh-v1.5')"
 
 # 再拷贝项目代码（含 data/sample/ 示例索引）
