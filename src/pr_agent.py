@@ -138,9 +138,10 @@ def call_llm(prompt: str) -> str:
 # ==============================
 
 def apply_model_name_rules(text: str) -> str:
-    replacements = {
-        "VLE": "全新纯电VLE"
-    }
+    # 车型名规范化：将简称统一为品牌标准写法。
+    # 这里留空字典作为可扩展点——实际规则应来自上传的术语表，
+    # 不在代码里硬编码任何具体客户的车型名。
+    replacements: dict[str, str] = {}
     for old, new in replacements.items():
         text = text.replace(old, new)
     return text
@@ -514,46 +515,7 @@ paragraphs:
         check_result["revision_advice"] = []
 
     return check_result
-def postprocess_generate_result(result: Dict[str, Any]) -> Dict[str, Any]:
-    banned_title_prefixes = ["如何", "看", "为什么"]
-    banned_phrases = ["沉浸式", "私人影院", "重新定义", "无限可能"]
 
-    # 处理 titles
-    titles = result.get("titles", {}).get("titles", [])
-    cleaned_titles = []
-    for item in titles:
-        title = item.get("title", "").strip()
-
-        # 去掉问句/媒体导语感
-        if "？" in title or title.startswith(tuple(banned_title_prefixes)):
-            continue
-
-        for p in banned_phrases:
-            title = title.replace(p, "")
-
-        item["title"] = title.strip("：:，, ")
-        if item["title"]:
-            cleaned_titles.append(item)
-
-    result["titles"]["titles"] = cleaned_titles[:4]
-
-    # 处理正文
-    paragraphs = result.get("paragraphs", {})
-    lead = paragraphs.get("lead", "")
-    body_paragraphs = paragraphs.get("body_paragraphs", [])
-    social_copies = paragraphs.get("social_copies", [])
-
-    def clean_text(text: str) -> str:
-        for p in banned_phrases:
-            text = text.replace(p, "")
-        return text.strip()
-
-    paragraphs["lead"] = clean_text(lead)
-    paragraphs["body_paragraphs"] = [clean_text(x) for x in body_paragraphs]
-    paragraphs["social_copies"] = [clean_text(x) for x in social_copies]
-
-    result["paragraphs"] = paragraphs
-    return result
 
 def postprocess_generate_result(result: Dict[str, Any]) -> Dict[str, Any]:
     banned_title_prefixes = ["如何", "看", "为什么"]
@@ -880,14 +842,14 @@ def check_text(text: str) -> str:
    - 重新定义
    - 颠覆
 12. 是否有品牌口径不统一、命名不统一、时间/时区写法不规范的问题
-13. 如果出现 VLE，是否建议统一写作“全新纯电VLE”
+13. 车型名、技术术语是否符合品牌术语表的标准写法（若已提供术语表）
 
 【特别要求】
 - 不仅指出“错误”，也指出“在 PR 写作里值得注意的小点”
 - 如果句子本身语法没错，但从汽车公关写作角度看不够稳妥，也请指出
 - 如果内容已经基本没问题，也请给出 1-3 条“可进一步优化的小建议”
 - 请尽量像一个有经验的公关同事在帮忙看稿，而不是只做语法检查
-- 如涉及品牌、车型、技术术语，请优先按奔驰官方写法和更稳妥的 PR 语气提出建议
+- 如涉及品牌、车型、技术术语，请优先按品牌官方写法（以术语表为准）和更稳妥的 PR 语气提出建议
 - 如出现“德国时间”“中国时间”等口语说法，请优先提示是否应改为更正式的时区表达，例如“欧洲中部时间（CET）”“北京时间（UTC+8）”
 
 【输出要求】
@@ -920,13 +882,6 @@ PR写作提醒：
 # Mode: normalize
 # ==============================
 
-def apply_mb_term_rules(text: str) -> str:
-    for k, v in MB_EN_TO_CN.items():
-        text = text.replace(k,v)
-    for k, v in MB_CN_TO_EN.items():
-        pass
-    return text
-
 def normalize_pr(text: str) -> str:
     normalized = normalize_text(text)
     normalized = apply_model_name_rules(normalized)
@@ -943,7 +898,7 @@ def normalize_pr(text: str) -> str:
 3. 优先使用准确、规范、书面的说法
 4. 避免口语化、随意化表达
 5. 只输出最终优化后的版本，不要解释
-6. 如提及 VLE，统一写作“全新纯电VLE”，不要仅写”VLE”。
+6. 车型名、技术术语请按品牌术语表的标准写法（若已提供术语表）。
 
 【文本】
 {normalized}

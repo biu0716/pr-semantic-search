@@ -1,9 +1,20 @@
+# 环境 / 缓存
 .venv/
 .venv311/
 .env
 __pycache__/
 *.pyc
 .DS_Store
+
+# ⚠️ 真实知识库（含客户内部资料）——绝不提交、绝不公开
 data/index.faiss
 data/meta.json
 data/new_docs/
+
+# 备注：data/sample/ 与 data/sample_docs/ 是脱敏示例，
+# demo 需要它们，所以【不要】忽略，要正常提交。
+
+# 私人求职材料 / 归档旧代码——不进公开仓库
+docs/
+assets/resume/
+legacy/

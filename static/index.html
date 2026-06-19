@@ -127,6 +127,7 @@
   .hit-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
   .badge{font-size:11px;color:var(--ink-soft);background:var(--badge);border-radius:999px;padding:3px 10px}
   .badge.model{background:var(--accent-soft);color:var(--accent);font-weight:500}
+  .badge.why{background:#eef6f4;color:var(--accent);font-weight:500}
   .score{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
   .hit-text{font-size:13.5px;color:var(--ink-soft);line-height:1.7}
   .breakdown{font-size:11.5px;color:var(--muted);margin-top:10px;cursor:pointer}
@@ -164,7 +165,7 @@
           <div>
             <div class="ttl">写一份新提案 <span class="tag">最常用</span></div>
             <div class="desc">给一句需求，自动产出「传播策略骨架 + 具体交付内容」</div>
-            <div class="eg">例：为新一代 S 级轿车全球首秀写一版传播提案</div>
+            <div class="eg">例：为旗舰纯电轿车 NOVA S9 全球首发写一版传播提案</div>
           </div>
           <span class="arrow">→</span>
         </div>
@@ -182,7 +183,7 @@
           <div>
             <div class="ttl">查资料、找素材</div>
             <div class="desc">从知识库语义检索，并看每条为什么匹配</div>
-            <div class="eg">例：S 级的传播亮点有哪些</div>
+            <div class="eg">例：NOVA S9 的传播亮点有哪些</div>
           </div>
           <span class="arrow">→</span>
         </div>
@@ -200,7 +201,7 @@
           <div class="chips" id="g-chips"></div>
           <div class="field">
             <div class="label">传播需求</div>
-            <textarea id="g-query" placeholder="描述你要做的传播，例如：为新一代 S 级全球首秀写一版面向科技与豪华受众的提案"></textarea>
+            <textarea id="g-query" placeholder="描述你要做的传播，例如：为 NOVA S9 全球首发写一版面向科技与豪华受众的提案"></textarea>
           </div>
           <details class="opts">
             <summary><span class="pm"></span> 添加参考资料 / 术语表（可选）</summary>
@@ -225,7 +226,7 @@
           <button class="btn btn-primary" id="g-run">生成提案</button>
         </div>
         <div class="panel right" id="g-result">
-          <div class="placeholder"><div class="big">两阶段生成</div>左边填需求或点个例子，结果会出现在这里</div>
+          <div class="placeholder"><div class="big">两阶段生成</div>先出「传播策略骨架」对齐方向，再出新闻稿 / 标题 / 社媒等「具体交付」——每段都可单独重写</div>
         </div>
       </div>
     </section>
@@ -262,7 +263,7 @@
           <button class="btn btn-primary" id="r-run">开始处理</button>
         </div>
         <div class="panel right">
-          <div class="placeholder" id="r-result-ph"><div class="big">审稿 · 规范 · 改写</div>处理结果会出现在这里</div>
+          <div class="placeholder" id="r-result-ph"><div class="big">审稿 · 规范 · 改写</div>基于你的原稿处理：挑错给修改建议、按术语表统一口径、或改写成更稳妥的 PR 表达——不臆造新事实</div>
           <div id="r-result" style="display:none;width:100%"></div>
         </div>
       </div>
@@ -279,7 +280,7 @@
           <div class="chips" id="s-chips"></div>
           <div class="field">
             <div class="label">检索内容</div>
-            <textarea id="s-query" style="min-height:80px" placeholder="例如：S级 传播亮点"></textarea>
+            <textarea id="s-query" style="min-height:80px" placeholder="例如：NOVA S9 传播亮点"></textarea>
           </div>
           <div class="field">
             <div class="label">返回条数</div>
@@ -340,11 +341,11 @@ function enterTask(name){showView(name);}
 
 /* ---------- 例子 chips ---------- */
 const GEN_EGS=[
-  "为新一代 S 级轿车全球首秀写一版传播提案",
-  "围绕 GLE 智能驾驶亮点，写一组媒体沟通要点",
-  "为纯电 VLE 上市写传播主题和社媒文案"
+  "为旗舰纯电轿车 NOVA S9 全球首发写一版传播提案",
+  "围绕智能 SUV NOVA X7 的智能驾驶亮点，写一组媒体沟通要点",
+  "为纯电 MPV NOVA V9 上市写传播主题和社媒文案"
 ];
-const SEARCH_EGS=["S级 传播亮点","GLE 智能驾驶","VLE 上市信息"];
+const SEARCH_EGS=["NOVA S9 传播亮点","NOVA X7 智能驾驶","NOVA V9 上市信息"];
 function buildChips(containerId, list, onPick){
   const c=document.getElementById(containerId);
   c.innerHTML=list.map(t=>`<span class="chip">${esc(t)}</span>`).join("");
@@ -353,7 +354,7 @@ function buildChips(containerId, list, onPick){
 buildChips("g-chips", GEN_EGS, t=>{document.getElementById("g-query").value=t;});
 buildChips("s-chips", SEARCH_EGS, t=>{document.getElementById("s-query").value=t; document.getElementById("s-run").click();});
 
-const SAMPLE_DRAFT="新一代奔驰S级今天正式发布，这款车搭载了超大的中控屏幕，内饰用了很多真皮材料，动力非常强劲，是奔驰史上最豪华的旗舰轿车。新车将于近期上市，价格预计很有竞争力，相信一定会大卖。";
+const SAMPLE_DRAFT="星航NOVA S9今天正式发布，这款车搭载了超大的中控屏幕，内饰用了很多真皮材料，动力非常强劲，是星航史上最豪华的旗舰轿车。新车将于近期上市，价格预计很有竞争力，相信一定会大卖。";
 document.getElementById("r-sample").onclick=()=>{document.getElementById("r-text").value=SAMPLE_DRAFT;};
 
 /* ---------- 后端探活 ---------- */
@@ -390,6 +391,7 @@ function renderGenerate(stage1,stage2){
       <input type="text" id="g-refine-input" placeholder="例如：第二步语气更克制、突出科技感"></div>
       <button class="btn btn-ghost" id="g-refine-btn" style="padding:13px 18px">优化</button></div>
     <div class="export-bar">
+      <button class="btn btn-ghost" id="g-copy">📋 复制全文</button>
       <button class="btn btn-ghost" data-exp="docx">导出 Word</button>
       <button class="btn btn-ghost" data-exp="md">导出 Markdown</button>
       <button class="btn btn-ghost" data-exp="txt">导出 txt</button></div>`;
@@ -407,6 +409,14 @@ function bindGenerateResultEvents(){
     try{const d=await apiJSON("/api/refine",{mode:"generate",current_result:G.currentResult,instruction:ins});
       G.currentResult=d.result;const[s1,s2]=splitTwoStage(d.result);renderGenerate(s1,s2);}catch(err){box.innerHTML=errHTML(err.message);}};
   document.querySelectorAll("#g-result [data-exp]").forEach(b=>{b.onclick=()=>downloadExport(G.currentResult,b.dataset.exp);});
+  const gc=document.getElementById("g-copy");if(gc)gc.onclick=()=>copyText(getDeliveryForCopy(G.currentResult),gc);
+}
+// 复制时优先只复制"第二步·具体交付内容"（公关真正要粘出去用的部分）；没有分段就复制全文。
+function getDeliveryForCopy(text){const[,s2]=splitTwoStage(text||"");return(s2||text||"").trim();}
+async function copyText(text,btn){
+  try{await navigator.clipboard.writeText(text);}
+  catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();}
+  if(btn){const old=btn.textContent;btn.textContent="✓ 已复制";setTimeout(()=>btn.textContent=old,1500);}
 }
 function splitTwoStage(text){
   if(text.includes("【第一步｜传播策略骨架】")&&text.includes("【第二步｜具体交付内容】")){
@@ -435,11 +445,24 @@ document.getElementById("r-run").onclick=async()=>{
   ph.style.display="none";box.style.display="block";box.innerHTML=loadingHTML("正在处理…");
   try{const d=await apiJSON("/api/refine-doc",{mode:rMode,source_text:text,instruction:document.getElementById("r-instruction").value.trim(),extra_terms:null});
     box.innerHTML=`<span class="stage-tag">处理结果</span>`+renderText(d.result)+
-      `<div class="export-bar"><button class="btn btn-ghost" data-rexp="docx">导出 Word</button><button class="btn btn-ghost" data-rexp="txt">导出 txt</button></div>`;
-    box.querySelectorAll("[data-rexp]").forEach(b=>b.onclick=()=>downloadExport(d.result,b.dataset.rexp));}
+      `<div class="export-bar"><button class="btn btn-ghost" id="r-copy">📋 复制全文</button><button class="btn btn-ghost" data-rexp="docx">导出 Word</button><button class="btn btn-ghost" data-rexp="txt">导出 txt</button></div>`;
+    box.querySelectorAll("[data-rexp]").forEach(b=>b.onclick=()=>downloadExport(d.result,b.dataset.rexp));
+    const rc=document.getElementById("r-copy");if(rc)rc.onclick=()=>copyText((d.result||"").trim(),rc);}
   catch(err){box.innerHTML=errHTML(err.message);}};
 
 /* ====================== 知识检索 ====================== */
+// 从得分构成里挑出"贡献最大的那个重排维度"，让用户一眼看到这条为什么排前面。
+// 只看加分项（排除语义分本身和总分），加分大于 0 才显示。
+function topReason(bd){
+  const skip={"语义分":1,"总分":1};
+  let best=null,bestV=0;
+  for(const[k,v]of Object.entries(bd)){
+    if(skip[k])continue;
+    const n=typeof v==="number"?v:parseFloat(v);
+    if(!isNaN(n)&&n>bestV){bestV=n;best=k;}
+  }
+  return bestV>0?best:null;
+}
 document.getElementById("s-run").onclick=async()=>{
   const query=document.getElementById("s-query").value.trim();const k=parseInt(document.getElementById("s-k").value)||5;
   const ph=document.getElementById("s-result-ph"),box=document.getElementById("s-result");
@@ -449,10 +472,12 @@ document.getElementById("s-run").onclick=async()=>{
     if(!results.length){box.innerHTML=`<div class="placeholder">没有命中结果</div>`;return;}
     box.innerHTML=`<span class="stage-tag">${results.length} 条结果</span>`+results.map(r=>{
       const bd=r.score_breakdown||{};const rows=Object.entries(bd).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join("");
+      const why=topReason(bd);
       return `<div class="hit"><div class="hit-top">
         <span class="badge model">${esc(r.car_model||"未标车型")}</span>
         ${r.doc_type?`<span class="badge">${esc(r.doc_type)}</span>`:""}
         ${r.version_date?`<span class="badge">${esc(r.version_date)}</span>`:""}
+        ${why?`<span class="badge why">✓ ${esc(why)}</span>`:""}
         <span class="score">综合分 ${r.rerank_score!=null?r.rerank_score.toFixed(3):"-"}</span></div>
         <div class="hit-text">${esc((r.text||"").slice(0,220))}${(r.text||"").length>220?"…":""}</div>
         ${rows?`<details class="breakdown"><summary>得分构成</summary><table>${rows}</table></details>`:""}</div>`;

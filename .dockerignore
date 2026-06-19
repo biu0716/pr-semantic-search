@@ -13,5 +13,5 @@ data/new_docs/
 
 # 部署不需要的东西
 tests/
-streamlit_app.py
+legacy/
 assets/
