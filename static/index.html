@@ -3,486 +3,1309 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PR Agent · 传播提案工作台</title>
+<title>PR Agent 内容工作台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2318120A'/%3E%3Cpath d='M12 10h32l8 8v36H12z' fill='%23F2EDE5'/%3E%3Cpath d='M12 10h32v8h8' fill='none' stroke='%23C41F2E' stroke-width='4'/%3E%3Ctext x='20' y='39' font-size='14' font-family='Arial' font-weight='700' fill='%23C41F2E'%3EPR%3C/text%3E%3C/svg%3E">
 <style>
+  @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap");
+
   :root{
-    --bg:#f3f1ec; --card:#ffffff; --ink:#17150f; --ink-soft:#57534e; --muted:#928c84;
-    --line:#e7e3da; --accent:#1d6f67; --accent-soft:#e7f0ee; --badge:#f1efe9;
-    --radius:18px; --radius-lg:26px;
-    --shadow:0 1px 2px rgba(23,21,15,.04), 0 8px 28px rgba(23,21,15,.05);
-    --shadow-lift:0 2px 6px rgba(23,21,15,.06), 0 16px 44px rgba(23,21,15,.09);
-    --serif:"Songti SC","STSong","Source Han Serif SC","Noto Serif SC",serif;
-    --sans:"PingFang SC","Helvetica Neue","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    --linen:#F2EDE5;
+    --linen-2:#EAE4DC;
+    --paper:#FFFFFF;
+    --ink:#1C1917;
+    --muted:#78716C;
+    --border:#E0D8CE;
+    --red:#C41F2E;
+    --amber:#B45309;
+    --green:#059669;
+    --sidebar:#18120A;
+    --sidebar-text:#F0E6CC;
+    --sidebar-dim:#6B5E4E;
+    --sidebar-border:rgba(240,230,204,.07);
+    --sans:"DM Sans","PingFang SC","Helvetica Neue",system-ui,sans-serif;
+    --display:"Barlow Condensed","DM Sans",system-ui,sans-serif;
+    --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+    --serif:"Lora","Songti SC","STSong",Georgia,serif;
   }
+
   *{box-sizing:border-box;margin:0;padding:0}
-  html{-webkit-font-smoothing:antialiased}
-  body{font-family:var(--sans);color:var(--ink);background:var(--bg);min-height:100vh;line-height:1.6;
-    background-image:radial-gradient(circle at 18% 12%, rgba(29,111,103,.04), transparent 38%),
-                     radial-gradient(circle at 88% 8%, rgba(154,107,47,.035), transparent 32%);}
+  html{-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+  body{
+    min-height:100dvh;
+    color:var(--ink);
+    background:var(--linen);
+    font-family:var(--sans);
+    overflow:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.025;
+    z-index:30;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+  }
 
-  header{max-width:1080px;margin:0 auto;padding:30px 28px 0;}
-  .brand{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
-  .brand h1{font-family:var(--serif);font-weight:600;font-size:27px;letter-spacing:.5px;cursor:pointer}
-  .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-bottom:3px}
-  .brand .sub{color:var(--muted);font-size:13px}
-  .status{margin-left:auto;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
-  .status .ring{width:8px;height:8px;border-radius:50%;background:#cfcabf;transition:.3s}
-  .status.ok .ring{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  button,input,textarea,select{font:inherit}
+  button{cursor:pointer}
+  button:disabled{cursor:not-allowed}
+  .app{height:100dvh;width:100%;display:flex;overflow:hidden;background:var(--linen)}
 
-  main{max-width:1080px;margin:0 auto;padding:0 28px 80px}
+  .sidebar{
+    width:208px;
+    height:100%;
+    flex:0 0 208px;
+    display:flex;
+    flex-direction:column;
+    background:var(--sidebar);
+    border-right:1px solid var(--sidebar-border);
+    color:var(--sidebar-text);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:20px;
+    border-bottom:1px solid var(--sidebar-border);
+  }
+  .brand-mark{
+    width:30px;
+    height:30px;
+    display:grid;
+    place-items:center;
+    background:var(--red);
+    color:#fff;
+    font:700 12px/1 var(--display);
+    letter-spacing:.08em;
+    clip-path:polygon(0 0,100% 0,100% 74%,74% 100%,0 100%);
+  }
+  .brand-name{
+    font:700 15px/.9 var(--display);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+  .brand-sub{
+    margin-top:4px;
+    color:var(--sidebar-dim);
+    font:500 8px/1 var(--mono);
+    letter-spacing:.2em;
+  }
+  .project{
+    padding:17px 20px;
+    border-bottom:1px solid var(--sidebar-border);
+  }
+  .micro{
+    color:var(--sidebar-dim);
+    font:500 8px/1 var(--mono);
+    letter-spacing:.22em;
+    text-transform:uppercase;
+  }
+  .project-title{
+    margin-top:9px;
+    font:700 18px/.95 var(--display);
+  }
+  .project-desc{
+    margin-top:3px;
+    color:rgba(240,230,204,.72);
+    font:600 13px/1.1 var(--display);
+  }
+  .nav{
+    flex:1;
+    padding:15px 12px;
+    overflow:auto;
+  }
+  .nav-title{padding:0 8px 9px}
+  .nav-btn{
+    position:relative;
+    width:100%;
+    border:0;
+    background:transparent;
+    color:var(--sidebar-dim);
+    text-align:left;
+    padding:13px 14px;
+    transition:background .18s ease,color .18s ease,transform .18s ease;
+  }
+  .nav-btn:hover{background:rgba(240,230,204,.045);transform:translateX(2px)}
+  .nav-btn.active{background:rgba(240,230,204,.075);color:var(--sidebar-text)}
+  .nav-btn.active::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:var(--red);
+  }
+  .nav-num{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:4px;
+    color:inherit;
+    font:500 8px/1 var(--mono);
+  }
+  .nav-dot{
+    width:5px;
+    height:5px;
+    border:1px solid currentColor;
+    border-radius:50%;
+  }
+  .nav-btn.active .nav-dot{background:var(--red);border-color:var(--red)}
+  .nav-line{
+    display:block;
+    font:700 17px/.9 var(--display);
+    letter-spacing:.02em;
+  }
+  .recent{
+    padding:15px 20px;
+    border-top:1px solid var(--sidebar-border);
+  }
+  .recent button{
+    width:100%;
+    border:0;
+    background:transparent;
+    color:var(--sidebar-dim);
+    display:flex;
+    gap:8px;
+    align-items:center;
+    padding:7px 0;
+    font-size:11px;
+    text-align:left;
+  }
+  .recent button:hover{color:var(--sidebar-text)}
+  .sync{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:13px 20px;
+    border-top:1px solid var(--sidebar-border);
+    color:var(--sidebar-dim);
+    font:500 8px/1 var(--mono);
+  }
+  .sync-state{display:flex;align-items:center;gap:6px}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:#22C55E}
 
-  /* ---------- 引导首屏 ---------- */
-  .home{max-width:680px;margin:46px auto 0}
-  .home .value{font-family:var(--serif);font-size:25px;line-height:1.5;color:var(--ink)}
-  .home .value em{font-style:normal;color:var(--accent)}
-  .home .lead{color:var(--muted);font-size:14px;margin:26px 0 14px;letter-spacing:.3px}
-  .jobs{display:grid;gap:13px}
-  .job{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
-    box-shadow:var(--shadow);padding:20px 22px;cursor:pointer;
-    transition:transform .14s, box-shadow .2s, border-color .2s;display:flex;gap:16px;align-items:flex-start}
-  .job:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift);border-color:#d8d2c6}
-  .job.primary{border-color:var(--accent)}
-  .job .ic{font-size:22px;line-height:1;margin-top:3px;color:var(--accent);flex-shrink:0}
-  .job .ttl{font-size:17px;font-weight:600;display:flex;align-items:center;gap:9px}
-  .job .tag{font-size:11px;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 10px;font-weight:500}
-  .job .desc{font-size:14px;color:var(--ink-soft);margin:5px 0 9px;line-height:1.6}
-  .job .eg{font-size:13px;color:var(--muted)}
-  .job .arrow{margin-left:auto;color:var(--muted);font-size:18px;align-self:center;transition:transform .2s,color .2s}
-  .job:hover .arrow{transform:translateX(3px);color:var(--accent)}
+  .main{min-width:0;flex:1;height:100%;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{
+    height:44px;
+    flex:0 0 44px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    padding:0 28px;
+    background:rgba(255,255,255,.48);
+    border-bottom:1px solid var(--border);
+    backdrop-filter:blur(12px);
+  }
+  .crumbs{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    color:var(--muted);
+    font:500 11px/1 var(--mono);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .crumb-current{color:var(--ink)}
+  .top-meta{display:flex;align-items:center;gap:18px;color:var(--muted);font:500 8px/1 var(--mono)}
+  .top-meta b{color:var(--ink);font-weight:500}
 
-  /* ---------- 任务工作区 ---------- */
-  .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;cursor:pointer;
-    margin:34px 0 16px;transition:color .2s;background:none;border:none;font-family:var(--sans)}
-  .back:hover{color:var(--accent)}
-  .grid{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:22px;align-items:start}
-  @media(max-width:820px){.grid{grid-template-columns:1fr}}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:24px}
-  .panel.right{min-height:380px;display:flex;flex-direction:column}
-  .task-h{font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:4px}
-  .task-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+  .workspace{flex:1;min-height:0;overflow:hidden}
+  .mode-panel{display:none;height:100%;overflow:auto;scrollbar-width:none}
+  .mode-panel.active{display:block;animation:panelIn .22s ease both}
+  @keyframes panelIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  }
+  .mode-inner{width:min(760px,100%);margin:0 auto;padding:38px 46px 56px}
+  .mode-title{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    margin-bottom:26px;
+  }
+  .title-left{display:flex;align-items:baseline;gap:18px}
+  .big-num{
+    user-select:none;
+    color:var(--border);
+    font:700 70px/.8 var(--display);
+  }
+  .section-mark{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--muted);
+    font:500 8px/1 var(--mono);
+    letter-spacing:.2em;
+    text-transform:uppercase;
+  }
+  .section-mark::before{
+    content:"";
+    width:1px;
+    height:14px;
+    background:currentColor;
+  }
+  .section-mark.red{color:var(--red)}
+  .section-mark.amber{color:var(--amber)}
+  .section-mark.green{color:var(--green)}
+  .title-copy{
+    margin-top:7px;
+    color:var(--muted);
+    font-size:12px;
+  }
 
-  .label{font-size:13px;color:var(--ink-soft);font-weight:500;margin-bottom:8px}
-  .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
-  textarea,input[type=text],input[type=number]{width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);
-    border:1px solid var(--line);border-radius:13px;background:#fcfbf8;padding:12px 13px;resize:vertical;transition:.2s}
-  textarea:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
-  textarea{min-height:108px}
-  .field+.field{margin-top:16px}
-
-  /* 例子 chips */
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  .chip{font-size:12.5px;color:var(--ink-soft);background:#fcfbf8;border:1px solid var(--line);
-    border-radius:999px;padding:7px 13px;cursor:pointer;transition:.18s}
-  .chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-  .chips-label{font-size:12px;color:var(--muted);margin-bottom:8px}
-
-  /* 折叠可选项 */
-  details.opts{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
-  details.opts summary{font-size:13px;color:var(--ink-soft);cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px}
-  details.opts summary::-webkit-details-marker{display:none}
-  details.opts summary .pm{color:var(--accent);font-weight:600}
-  details.opts[open] summary .pm::before{content:"–"} details.opts summary .pm::before{content:"+"}
-  .opts-body{margin-top:14px}
-
-  .uploader{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
-  .file-btn{font-size:13px;color:var(--ink-soft);cursor:pointer;border:1px dashed var(--line);
-    border-radius:11px;padding:9px 15px;background:#fcfbf8;transition:.2s;white-space:nowrap}
-  .file-btn:hover{border-color:var(--accent);color:var(--accent)}
-  .file-name{font-size:12px;color:var(--muted);word-break:break-all}
-  .file-name.has{color:var(--accent)}
+  .doc{
+    background:var(--paper);
+    border:1px solid var(--border);
+    box-shadow:0 1px 0 rgba(28,25,23,.03),0 18px 42px rgba(28,25,23,.055);
+  }
+  .doc-pad{padding:24px}
+  .doc-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:14px;
+    margin-bottom:18px;
+  }
+  .doc-meta{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    color:var(--muted);
+    font:500 9px/1 var(--mono);
+  }
+  .stamp{
+    display:inline-flex;
+    align-items:center;
+    border:2px solid color-mix(in srgb,var(--stamp-color,var(--red)) 45%,transparent);
+    color:var(--stamp-color,var(--red));
+    padding:3px 8px;
+    font:700 9px/1 var(--mono);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .field{margin-top:17px}
+  .label{
+    display:block;
+    margin-bottom:7px;
+    color:var(--muted);
+    font:700 8px/1 var(--mono);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+  textarea,input,select{
+    width:100%;
+    border:0;
+    border-bottom:1px solid var(--border);
+    border-radius:0;
+    background:transparent;
+    color:var(--ink);
+    padding:10px 0;
+    outline:none;
+  }
+  textarea{
+    min-height:128px;
+    resize:vertical;
+    font:400 14px/1.78 var(--serif);
+  }
+  input,select{font-size:13px}
+  textarea:focus,input:focus,select:focus{border-color:var(--red);box-shadow:0 1px 0 var(--red)}
+  .select-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+  .file-line{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    padding-top:10px;
+  }
   input[type=file]{display:none}
+  .file-btn,.ghost-btn,.primary-btn,.text-btn{
+    border:0;
+    background:transparent;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    white-space:nowrap;
+    transition:transform .16s ease,opacity .16s ease,background .16s ease,color .16s ease,border-color .16s ease;
+  }
+  .file-btn,.ghost-btn{
+    min-height:34px;
+    padding:9px 12px;
+    border:1px solid var(--border);
+    color:var(--muted);
+    font:500 11px/1 var(--mono);
+  }
+  .file-btn:hover,.ghost-btn:hover{border-color:var(--ink);color:var(--ink)}
+  .primary-btn{
+    min-height:38px;
+    padding:10px 20px;
+    color:#fff;
+    background:var(--red);
+    font-weight:700;
+    font-size:13px;
+    clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));
+  }
+  .primary-btn.amber{background:var(--amber)}
+  .primary-btn.green{background:var(--green)}
+  .primary-btn:hover,.file-btn:hover,.ghost-btn:hover,.text-btn:hover{transform:translateY(-1px)}
+  .primary-btn:active,.file-btn:active,.ghost-btn:active,.text-btn:active{transform:translateY(1px)}
+  .primary-btn:disabled{opacity:.36}
+  .text-btn{
+    color:var(--muted);
+    font:500 11px/1 var(--mono);
+  }
+  .text-btn:hover{color:var(--ink)}
+  .button-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    border-top:1px solid var(--border);
+    margin-top:18px;
+    padding-top:16px;
+  }
+  .button-row-left,.button-row-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .file-name{color:var(--muted);font-size:12px}
+  .file-name.has{color:var(--green);font-weight:700}
+  .hint-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--muted);
+    padding:6px 9px;
+    font:500 10px/1.2 var(--mono);
+  }
+  .chip:hover{border-color:var(--red);color:var(--red)}
 
-  .seg{display:flex;gap:8px;flex-wrap:wrap}
-  .seg button{font-size:13px;color:var(--ink-soft);cursor:pointer;border:1px solid var(--line);
-    background:#fcfbf8;border-radius:999px;padding:8px 15px;transition:.2s;font-family:var(--sans)}
-  .seg button:hover{border-color:var(--accent)}
-  .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-
-  .btn{font-family:var(--sans);font-size:15px;cursor:pointer;border:none;border-radius:13px;
-    padding:13px 22px;transition:transform .12s,box-shadow .2s,opacity .2s;letter-spacing:.5px}
-  .btn-primary{background:var(--ink);color:#fff;width:100%;margin-top:20px;box-shadow:var(--shadow)}
-  .btn-primary:hover{box-shadow:var(--shadow-lift);transform:translateY(-1px)}
-  .btn:disabled{opacity:.45;cursor:default;transform:none!important;box-shadow:none}
-  .btn-ghost{background:#fcfbf8;color:var(--ink-soft);border:1px solid var(--line);font-size:13px;padding:8px 14px;border-radius:11px}
-  .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
-
-  .placeholder{margin:auto;text-align:center;color:var(--muted);padding:44px 10px}
-  .placeholder .big{font-family:var(--serif);font-size:20px;color:var(--ink-soft);margin-bottom:8px}
-  .stage-tag{display:inline-block;font-size:11px;letter-spacing:1px;color:var(--accent);background:var(--accent-soft);
-    border-radius:999px;padding:4px 12px;margin-bottom:14px;font-weight:500}
-  .result-block+.result-block{margin-top:24px;padding-top:24px;border-top:1px solid var(--line)}
-  .rt h3{font-family:var(--serif);font-size:16px;font-weight:600;margin:18px 0 7px}
+  .result-doc{margin-top:20px;overflow:hidden}
+  .result-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:20px;
+    padding:22px 28px 18px;
+    border-bottom:1px solid var(--border);
+  }
+  .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .release-title{padding:26px 28px 20px;border-bottom:1px solid var(--border)}
+  .release-title h1{
+    max-width:640px;
+    color:var(--ink);
+    font:700 clamp(2rem,4vw,2.75rem)/.95 var(--display);
+    letter-spacing:.01em;
+  }
+  .release-title p{margin-top:8px;color:var(--muted);font:600 18px/1.2 var(--display)}
+  .rt{padding:24px 28px}
+  .rt h3{
+    margin:20px 0 9px;
+    color:var(--muted);
+    font:500 8px/1 var(--mono);
+    letter-spacing:.2em;
+    text-transform:uppercase;
+  }
   .rt h3:first-child{margin-top:0}
-  .rt p{font-size:14.5px;margin:7px 0;line-height:1.75}
-  .rt ul{margin:6px 0 6px 2px;list-style:none}
-  .rt li{font-size:14.5px;margin:6px 0;padding-left:18px;position:relative;line-height:1.7}
-  .rt li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
-  .section-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
-  .refine-bar{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
-  .refine-bar .field{flex:1;min-width:200px;margin:0}
-  .export-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+  .rt p,.rt li{color:var(--ink);font:400 14px/1.82 var(--serif)}
+  .rt ul{list-style:none;margin:7px 0}
+  .rt li{position:relative;padding-left:16px;margin:4px 0}
+  .rt li::before{content:"";position:absolute;left:0;top:.82em;width:5px;height:5px;background:var(--red);border-radius:50%}
+  .social-block{background:rgba(180,83,9,.045);border-top:1px solid var(--border)}
 
-  .hit{border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px;background:#fcfbf8}
-  .hit+.hit{margin-top:11px}
-  .hit-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
-  .badge{font-size:11px;color:var(--ink-soft);background:var(--badge);border-radius:999px;padding:3px 10px}
-  .badge.model{background:var(--accent-soft);color:var(--accent);font-weight:500}
-  .badge.why{background:#eef6f4;color:var(--accent);font-weight:500}
-  .score{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .hit-text{font-size:13.5px;color:var(--ink-soft);line-height:1.7}
-  .breakdown{font-size:11.5px;color:var(--muted);margin-top:10px;cursor:pointer}
-  .breakdown summary{color:var(--accent)}
-  .breakdown table{margin-top:8px;border-collapse:collapse;width:100%}
-  .breakdown td{padding:3px 8px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
-  .breakdown td:last-child{text-align:right;color:var(--ink-soft)}
+  .empty{
+    min-height:170px;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    color:var(--muted);
+    padding:28px;
+    font:400 14px/1.7 var(--serif);
+  }
+  .loading{
+    min-height:180px;
+    display:grid;
+    place-items:center;
+    color:var(--muted);
+    padding:28px;
+    font:400 14px/1.7 var(--serif);
+  }
+  .skeleton{
+    width:100%;
+    display:grid;
+    gap:12px;
+  }
+  .sk-line{
+    height:12px;
+    background:linear-gradient(90deg,rgba(224,216,206,.45),rgba(224,216,206,.18),rgba(224,216,206,.45));
+    background-size:200% 100%;
+    animation:shimmer 1.4s infinite linear;
+  }
+  .sk-line.big{height:34px;width:76%}
+  .sk-line.mid{width:58%}
+  .sk-line.short{width:38%}
+  @keyframes shimmer{to{background-position:-200% 0}}
+  .err{
+    margin-top:18px;
+    padding:15px 18px;
+    border:1px solid rgba(196,31,46,.24);
+    background:rgba(196,31,46,.06);
+    color:#8F1822;
+    font-size:13px;
+  }
 
-  .loading{margin:auto;text-align:center;color:var(--muted);padding:50px 0}
-  .spinner{width:26px;height:26px;border:2.5px solid var(--line);border-top-color:var(--accent);
-    border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .err{background:#fbeee6;border:1px solid #f0d6bf;color:#8a4b1a;border-radius:13px;padding:14px 16px;font-size:13.5px;margin:auto;max-width:90%}
-  .fade{opacity:0;transform:translateY(8px);animation:rise .5s cubic-bezier(.2,.7,.3,1) forwards}
-  @keyframes rise{to{opacity:1;transform:none}}
+  .review-grid{display:grid;grid-template-columns:minmax(0,1fr) 286px}
+  .review-text{padding:28px;border-right:1px solid var(--border)}
+  .review-text p{font:400 16px/2.25 var(--serif)}
+  .mark{
+    display:inline;
+    border:0;
+    padding:1px 3px;
+    margin:0 1px;
+    color:var(--mark-color);
+    background:color-mix(in srgb,var(--mark-color) 12%,transparent);
+    text-decoration:underline;
+    text-decoration-style:wavy;
+    text-decoration-color:color-mix(in srgb,var(--mark-color) 55%,transparent);
+  }
+  .mark.active{color:#fff;background:var(--mark-color)}
+  .mark sup{font:700 9px/1 var(--mono);margin-left:2px}
+  .annotations{padding:22px 18px;background:rgba(180,83,9,.035)}
+  .annotation{
+    width:100%;
+    border:1px solid var(--border);
+    background:#fff;
+    padding:12px;
+    text-align:left;
+    margin-bottom:11px;
+  }
+  .annotation.active{border-color:var(--issue-color);background:color-mix(in srgb,var(--issue-color) 5%,#fff)}
+  .annotation-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .issue-num{font:700 11px/1 var(--mono);color:var(--issue-color)}
+  .issue-tag{font:700 8px/1 var(--mono);letter-spacing:.16em;color:var(--issue-color);text-transform:uppercase}
+  .annotation del{display:block;color:var(--muted);font-size:12px;margin-bottom:4px;text-decoration-color:var(--issue-color)}
+  .annotation strong{display:block;color:var(--ink);font-size:12px;font-weight:500}
+  .annotation p{display:none;margin-top:9px;padding-top:9px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;line-height:1.6}
+  .annotation.active p{display:block}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--muted);
+    padding:8px 10px;
+    font:500 10px/1 var(--mono);
+  }
+  .seg button.active{border-color:var(--amber);color:var(--amber);background:rgba(180,83,9,.07)}
+
+  .search-box{padding:20px;margin-bottom:18px}
+  .search-line{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px}
+  .search-line input{border:0;padding:9px 0;font-family:var(--serif)}
+  .filters{display:flex;gap:8px;flex-wrap:wrap}
+  .filter-btn{
+    border:1px solid var(--border);
+    color:var(--muted);
+    background:transparent;
+    padding:6px 10px;
+    font:500 9px/1 var(--mono);
+  }
+  .filter-btn.active{border-color:rgba(5,150,105,.52);color:var(--green);background:rgba(5,150,105,.065)}
+  .quick-list{overflow:hidden}
+  .quick-item{
+    width:100%;
+    border:0;
+    border-bottom:1px solid var(--border);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    padding:16px 22px;
+    text-align:left;
+  }
+  .quick-item:last-child{border-bottom:0}
+  .quick-item:hover{background:#F9F7F4}
+  .quick-main{display:flex;align-items:center;gap:16px;min-width:0}
+  .quick-num{width:18px;text-align:right;color:rgba(120,113,108,.38);font:500 9px/1 var(--mono)}
+  .quick-text{color:var(--muted);font:400 14px/1.45 var(--serif)}
+  .quick-tag{border:1px solid var(--border);color:var(--muted);padding:4px 7px;font:500 8px/1 var(--mono)}
+  .hit{
+    background:#fff;
+    border:1px solid var(--border);
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .hit-main{
+    width:100%;
+    border:0;
+    background:#fff;
+    display:flex;
+    gap:20px;
+    text-align:left;
+    padding:20px 22px;
+  }
+  .rel{width:44px;text-align:center;flex:0 0 44px}
+  .rel-num{font:700 32px/.85 var(--display)}
+  .rel-label{margin-top:2px;color:var(--muted);font:500 8px/1 var(--mono)}
+  .rel-line{height:2px;background:var(--border);margin-top:7px;overflow:hidden}
+  .rel-fill{height:100%;background:var(--hit-color);transform-origin:left}
+  .hit-content{min-width:0;flex:1}
+  .hit-top{display:flex;justify-content:space-between;gap:14px;margin-bottom:8px}
+  .hit h3{font-size:14px;line-height:1.35;font-weight:700}
+  .hit-tags{display:flex;gap:8px;flex-shrink:0}
+  .badge{border:1px solid var(--border);color:var(--muted);padding:4px 7px;font:500 8px/1 var(--mono)}
+  .hit p{color:var(--muted);font:400 13px/1.7 var(--serif)}
+  .hit-extra{display:none;border-top:1px solid var(--border);padding:13px 22px}
+  .hit.open .hit-extra{display:flex;gap:16px}
+
+  @media(max-width:860px){
+    body{overflow:auto}
+    .app{height:auto;min-height:100dvh;display:block;overflow:visible}
+    .sidebar{width:100%;height:auto;display:block;border-right:0;border-bottom:1px solid var(--sidebar-border)}
+    .brand,.project,.recent,.sync{display:none}
+    .nav{display:flex;gap:6px;overflow:auto;padding:10px;background:var(--sidebar)}
+    .nav-title{display:none}
+    .nav-btn{min-width:122px;padding:11px 12px}
+    .nav-line{font-size:14px;display:inline}
+    .main{height:auto;overflow:visible}
+    .workspace,.mode-panel{overflow:visible}
+    .topbar{height:auto;min-height:48px;padding:12px 16px;align-items:flex-start;flex-direction:column}
+    .top-meta{display:none}
+    .mode-inner{padding:26px 16px 42px}
+    .mode-title{align-items:flex-start}
+    .big-num{font-size:54px}
+    .select-row,.review-grid{grid-template-columns:1fr!important}
+    .review-text{border-right:0;border-bottom:1px solid var(--border)}
+    .result-head,.doc-head,.button-row,.search-line,.hit-main,.hit-top{align-items:flex-start;flex-direction:column}
+    .toolbar{width:100%}
+    .primary-btn,.ghost-btn,.file-btn{width:100%;min-width:0}
+    .button-row-left,.button-row-right{width:100%}
+    .file-line{display:grid;grid-template-columns:1fr;gap:9px}
+    .file-name{max-width:100%;overflow-wrap:anywhere}
+    .release-title h1{font-size:2.15rem}
+  }
 </style>
 </head>
 <body>
-  <header>
+<div class="app">
+  <aside class="sidebar">
     <div class="brand">
-      <h1 onclick="goHome()">PR Agent<span class="dot"></span></h1>
-      <span class="sub">汽车品牌传播提案工作台</span>
-      <span class="status" id="status"><span class="ring"></span><span id="statusText">连接后端中…</span></span>
+      <div class="brand-mark">PR</div>
+      <div>
+        <div class="brand-name">PR Agent</div>
+        <div class="brand-sub">内容工作台</div>
+      </div>
     </div>
-  </header>
+    <div class="project">
+      <div class="micro">当前项目</div>
+      <div class="project-title">汽车传播</div>
+      <div class="project-desc">Brief 到可用稿件</div>
+    </div>
+    <nav class="nav" aria-label="工作模块">
+      <div class="micro nav-title">工作模块</div>
+      <button class="nav-btn active" data-mode="generate">
+        <span class="nav-num">01 <span class="nav-dot"></span></span>
+        <span class="nav-line">传播内容</span>
+        <span class="nav-line">生成</span>
+      </button>
+      <button class="nav-btn" data-mode="review">
+        <span class="nav-num">02 <span class="nav-dot"></span></span>
+        <span class="nav-line">稿件审校</span>
+        <span class="nav-line">改写</span>
+      </button>
+      <button class="nav-btn" data-mode="search">
+        <span class="nav-num">03 <span class="nav-dot"></span></span>
+        <span class="nav-line">知识库</span>
+        <span class="nav-line">检索</span>
+      </button>
+    </nav>
+    <div class="recent">
+      <div class="micro" style="margin-bottom:8px">近期任务</div>
+      <button data-preset-mode="generate" data-preset="为新车上市发布生成传播方向、新闻稿标题、导语与社媒文案。"><span>•</span><span>上市发布传播稿</span></button>
+      <button data-preset-mode="review" data-preset="这款车型拥有行业领先的自动驾驶能力，即将在近期上市，将重新定义豪华出行体验。"><span>•</span><span>媒体沟通稿审校</span></button>
+      <button data-preset-mode="search" data-preset="智能辅助驾驶 技术表述 传播口径"><span>•</span><span>技术口径检索</span></button>
+    </div>
+    <div class="sync">
+      <span>知识库 <span id="kbCount">待连接</span></span>
+      <span class="sync-state"><span class="live-dot"></span><span id="statusText">连接中</span></span>
+    </div>
+  </aside>
 
-  <main>
-    <!-- ============ 引导首屏 ============ -->
-    <section id="home" class="home fade">
-      <div class="value">把一句话需求，变成<em>可直接交付</em>的传播提案。<br>也能帮你改稿、查素材。</div>
-      <div class="lead">你现在想做哪件事？</div>
-      <div class="jobs">
-        <div class="job primary" onclick="enterTask('generate')">
-          <span class="ic">✦</span>
-          <div>
-            <div class="ttl">写一份新提案 <span class="tag">最常用</span></div>
-            <div class="desc">给一句需求，自动产出「传播策略骨架 + 具体交付内容」</div>
-            <div class="eg">例：为旗舰纯电轿车 NOVA S9 全球首发写一版传播提案</div>
-          </div>
-          <span class="arrow">→</span>
-        </div>
-        <div class="job" onclick="enterTask('refine')">
-          <span class="ic">✎</span>
-          <div>
-            <div class="ttl">改一篇现有稿子</div>
-            <div class="desc">审稿挑错 · 术语规范化 · 正式风格改写</div>
-            <div class="eg">例：审一篇新闻稿，统一品牌口径、收敛风险措辞</div>
-          </div>
-          <span class="arrow">→</span>
-        </div>
-        <div class="job" onclick="enterTask('search')">
-          <span class="ic">⌕</span>
-          <div>
-            <div class="ttl">查资料、找素材</div>
-            <div class="desc">从知识库语义检索，并看每条为什么匹配</div>
-            <div class="eg">例：NOVA S9 的传播亮点有哪些</div>
-          </div>
-          <span class="arrow">→</span>
-        </div>
+  <main class="main">
+    <div class="topbar">
+      <div class="crumbs">
+        <span>PR Agent</span>
+        <span>›</span>
+        <span>内容工作台</span>
+        <span>›</span>
+        <span class="crumb-current" id="crumbMode">传播内容生成</span>
       </div>
-    </section>
+      <div class="top-meta">
+        <span>模块 <b id="modeMeta">生成</b></span>
+        <span>资料 <b>本地</b></span>
+      </div>
+    </div>
 
-    <!-- ============ 生成提案 ============ -->
-    <section class="view" id="view-generate" style="display:none">
-      <button class="back" onclick="goHome()">← 返回</button>
-      <div class="grid">
-        <div class="panel">
-          <div class="task-h">写一份新提案</div>
-          <div class="task-sub">给需求 → 出「策略骨架 + 交付内容」，可逐段重写</div>
-          <div class="chips-label">点一个例子直接试 ↓</div>
-          <div class="chips" id="g-chips"></div>
-          <div class="field">
-            <div class="label">传播需求</div>
-            <textarea id="g-query" placeholder="描述你要做的传播，例如：为 NOVA S9 全球首发写一版面向科技与豪华受众的提案"></textarea>
-          </div>
-          <details class="opts">
-            <summary><span class="pm"></span> 添加参考资料 / 术语表（可选）</summary>
-            <div class="opts-body">
-              <div class="field">
-                <div class="label">参考资料（txt / docx）</div>
-                <div class="uploader">
-                  <label class="file-btn">选择文件<input type="file" id="g-file" accept=".txt,.docx"></label>
-                  <span class="file-name" id="g-file-name">不选则基于知识库生成</span>
-                </div>
-              </div>
-              <div class="field">
-                <div class="label">术语表（csv / xlsx）</div>
-                <div class="uploader">
-                  <label class="file-btn">选择文件<input type="file" id="g-terms" accept=".csv,.xlsx,.xls"></label>
-                  <span class="file-name" id="g-terms-name">未选择</span>
-                </div>
-                <div class="hint">上传后强制按你的标准写法替换术语（如 大屏 → HYPERSCREEN）</div>
+    <div class="workspace">
+      <section class="mode-panel active" id="panel-generate">
+        <div class="mode-inner">
+          <div class="mode-title">
+            <div class="title-left">
+              <div class="big-num">01</div>
+              <div>
+                <div class="section-mark red">传播内容生成</div>
+                <div class="title-copy">输入传播需求，生成标题、导语、正文与社媒文案</div>
               </div>
             </div>
-          </details>
-          <button class="btn btn-primary" id="g-run">生成提案</button>
-        </div>
-        <div class="panel right" id="g-result">
-          <div class="placeholder"><div class="big">两阶段生成</div>先出「传播策略骨架」对齐方向，再出新闻稿 / 标题 / 社媒等「具体交付」——每段都可单独重写</div>
-        </div>
-      </div>
-    </section>
+            <button class="text-btn" id="g-reset">重新开始</button>
+          </div>
 
-    <!-- ============ 审稿改写 ============ -->
-    <section class="view" id="view-refine" style="display:none">
-      <button class="back" onclick="goHome()">← 返回</button>
-      <div class="grid">
-        <div class="panel">
-          <div class="task-h">改一篇现有稿子</div>
-          <div class="task-sub">基于你的原稿处理，不臆造新事实</div>
-          <div class="chips-label">没有稿子？点这个填入示例 ↓</div>
-          <div class="chips"><span class="chip" id="r-sample">填入一段示例新闻稿</span></div>
-          <div class="field">
-            <div class="label">原稿内容</div>
-            <textarea id="r-text" style="min-height:170px" placeholder="把要处理的稿件粘贴到这里，或从文件导入 / 点上方示例"></textarea>
-            <div class="uploader" style="margin-top:10px">
-              <label class="file-btn">从文件导入<input type="file" id="r-file" accept=".txt,.docx"></label>
-              <span class="file-name" id="r-file-name"></span>
+          <div class="doc doc-pad" id="g-input-doc">
+            <div class="doc-head">
+              <div class="doc-meta">
+                <span class="section-mark">需求简报</span>
+                <span>汽车 PR 传播任务</span>
+              </div>
+              <span class="stamp" style="--stamp-color:var(--red)">需求录入</span>
+            </div>
+            <div class="select-row">
+              <div>
+                <label class="label" for="g-content-type">内容类型</label>
+                <select id="g-content-type">
+                  <option>新闻稿</option>
+                  <option>社媒文案</option>
+                  <option>邀请函</option>
+                  <option>标题</option>
+                  <option>传播方向</option>
+                  <option>综合交付</option>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="g-brand">品牌</label>
+                <select id="g-brand">
+                  <option>Mercedes-Benz</option>
+                  <option>BMW</option>
+                  <option>MINI</option>
+                  <option>其他 / 待确认</option>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="g-tone">语气</label>
+                <select id="g-tone">
+                  <option>正式</option>
+                  <option>社媒化</option>
+                  <option>顾问感</option>
+                  <option>更像人话</option>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="g-goal">目标</label>
+                <select id="g-goal">
+                  <option>生成</option>
+                  <option>改写</option>
+                  <option>统一口径</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" for="g-query">传播需求</label>
+              <textarea id="g-query" placeholder="描述传播需求。例如：为全新车型上市发布生成传播内容，重点突出智能辅助驾驶、豪华座舱与品牌调性，面向汽车垂媒和科技媒体。"></textarea>
+            </div>
+            <div class="hint-chips" id="g-chips"></div>
+            <div class="select-row" style="grid-template-columns:1fr 1fr;margin-top:18px">
+              <div>
+                <label class="label">参考文件</label>
+                <div class="file-line">
+                  <label class="file-btn">上传文件<input type="file" id="g-file" accept=".txt,.docx"></label>
+                  <span class="file-name" id="g-file-name">未上传文件</span>
+                </div>
+              </div>
+              <div>
+                <label class="label">术语表</label>
+                <div class="file-line">
+                  <label class="file-btn">上传术语表<input type="file" id="g-terms" accept=".csv,.xlsx,.xls"></label>
+                  <span class="file-name" id="g-terms-name">可选</span>
+                </div>
+              </div>
+            </div>
+            <div class="button-row">
+              <div class="button-row-left">
+                <button class="primary-btn" id="g-run">生成传播内容</button>
+                <button class="ghost-btn" id="g-fill">填入示例</button>
+              </div>
+              <div class="button-row-right">
+                <span class="file-name">输出会整理成文档稿</span>
+              </div>
             </div>
           </div>
-          <div class="field">
-            <div class="label">处理方式</div>
-            <div class="seg" id="r-mode">
-              <button data-mode="check" class="on">审稿挑错</button>
-              <button data-mode="normalize">术语规范化</button>
-              <button data-mode="rewrite">正式改写</button>
+
+          <div class="doc result-doc" id="g-result">
+            <div class="empty">生成结果会出现在这里，结构会按标题、导语、正文和社媒文案拆开。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mode-panel" id="panel-review">
+        <div class="mode-inner">
+          <div class="mode-title">
+            <div class="title-left">
+              <div class="big-num">02</div>
+              <div>
+                <div class="section-mark amber">稿件审校改写</div>
+                <div class="title-copy">检查品牌口径、技术术语、事实风险和 PR 语气</div>
+              </div>
+            </div>
+            <button class="text-btn" id="r-sample">填入样稿</button>
+          </div>
+
+          <div class="doc doc-pad">
+            <div class="doc-head">
+              <div class="doc-meta">
+                <span class="section-mark">稿件原文</span>
+                <span>待审校稿件</span>
+              </div>
+              <span class="stamp" style="--stamp-color:var(--amber)">审校中</span>
+            </div>
+            <div class="select-row">
+              <div>
+                <label class="label" for="r-content-type">内容类型</label>
+                <select id="r-content-type">
+                  <option>新闻稿</option>
+                  <option>社媒文案</option>
+                  <option>邀请函</option>
+                  <option>标题</option>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="r-brand">品牌</label>
+                <select id="r-brand">
+                  <option>Mercedes-Benz</option>
+                  <option>BMW</option>
+                  <option>MINI</option>
+                  <option>其他 / 待确认</option>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="r-tone">语气</label>
+                <select id="r-tone">
+                  <option>正式</option>
+                  <option>社媒化</option>
+                  <option>顾问感</option>
+                  <option>更像人话</option>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="r-goal">目标</label>
+                <select id="r-goal">
+                  <option>审稿</option>
+                  <option>改写</option>
+                  <option>统一口径</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" for="r-text">稿件内容</label>
+              <textarea id="r-text" placeholder="粘贴需要审校或改写的稿件。"></textarea>
+            </div>
+            <div class="field">
+              <label class="label">审校模式</label>
+              <div class="seg" id="r-mode">
+                <button class="active" data-mode="check">风险检查</button>
+                <button data-mode="normalize">统一口径</button>
+                <button data-mode="rewrite">PR 风格改写</button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" for="r-instruction">补充要求</label>
+              <input id="r-instruction" type="text" placeholder="例如：更正式、删除夸张表述、按豪华品牌语气改写">
+            </div>
+            <div class="button-row">
+              <div class="button-row-left">
+                <button class="primary-btn amber" id="r-run">开始审校</button>
+                <label class="file-btn">导入文件<input type="file" id="r-file" accept=".txt,.docx"></label>
+              </div>
+              <span class="file-name" id="r-file-name">支持 txt / docx</span>
             </div>
           </div>
-          <div class="field">
-            <div class="label">额外要求（可选）</div>
-            <input type="text" id="r-instruction" placeholder="例如：语气再克制一些">
-          </div>
-          <button class="btn btn-primary" id="r-run">开始处理</button>
-        </div>
-        <div class="panel right">
-          <div class="placeholder" id="r-result-ph"><div class="big">审稿 · 规范 · 改写</div>基于你的原稿处理：挑错给修改建议、按术语表统一口径、或改写成更稳妥的 PR 表达——不臆造新事实</div>
-          <div id="r-result" style="display:none;width:100%"></div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ============ 知识检索 ============ -->
-    <section class="view" id="view-search" style="display:none">
-      <button class="back" onclick="goHome()">← 返回</button>
-      <div class="grid">
-        <div class="panel">
-          <div class="task-h">查资料、找素材</div>
-          <div class="task-sub">语义检索 + 规则重排，附每条得分构成</div>
-          <div class="chips-label">点一个例子直接搜 ↓</div>
-          <div class="chips" id="s-chips"></div>
-          <div class="field">
-            <div class="label">检索内容</div>
-            <textarea id="s-query" style="min-height:80px" placeholder="例如：NOVA S9 传播亮点"></textarea>
+          <div class="doc result-doc" id="r-result">
+            <div class="review-grid">
+              <div class="review-text">
+                <p>新款车型配备了 <button class="mark" style="--mark-color:var(--red)" data-issue="0">行业领先的自动驾驶功能<sup>①</sup></button>，这项技术将在 <button class="mark" style="--mark-color:var(--amber)" data-issue="1">近期发布<sup>②</sup></button>，足以 <button class="mark" style="--mark-color:var(--muted)" data-issue="2">吊打竞品<sup>③</sup></button>，为用户带来更有信心的出行体验。</p>
+              </div>
+              <div class="annotations">
+                <div class="micro" style="margin-bottom:14px;color:var(--muted)">编辑批注</div>
+                <button class="annotation" style="--issue-color:var(--red)" data-issue="0">
+                  <span class="annotation-top"><span class="issue-num">①</span><span class="issue-tag">术语风险</span></span>
+                  <del>行业领先的自动驾驶功能</del>
+                  <strong>智能辅助驾驶功能</strong>
+                  <p>涉及智能驾驶能力时，需要确认功能级别和官方命名，避免越界表述。</p>
+                </button>
+                <button class="annotation" style="--issue-color:var(--amber)" data-issue="1">
+                  <span class="annotation-top"><span class="issue-num">②</span><span class="issue-tag">时间表述</span></span>
+                  <del>近期发布</del>
+                  <strong>待官方发布时间确认</strong>
+                  <p>发布时间不明确时，建议保留为待确认，避免媒体引用后产生事实风险。</p>
+                </button>
+                <button class="annotation" style="--issue-color:var(--muted)" data-issue="2">
+                  <span class="annotation-top"><span class="issue-num">③</span><span class="issue-tag">PR 语气</span></span>
+                  <del>吊打竞品</del>
+                  <strong>建议删除或改成优势表达</strong>
+                  <p>竞品对比需要克制、准确，避免攻击性表达。</p>
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <div class="label">返回条数</div>
-            <input type="number" id="s-k" value="5" min="1" max="20" style="width:108px">
+        </div>
+      </section>
+
+      <section class="mode-panel" id="panel-search">
+        <div class="mode-inner">
+          <div class="mode-title">
+            <div class="title-left">
+              <div class="big-num">03</div>
+              <div>
+                <div class="section-mark green">知识库检索</div>
+                <div class="title-copy">从 PR 知识库查找资料、术语、历史稿件和品牌口径</div>
+              </div>
+            </div>
+            <button class="text-btn" id="s-reset">重新检索</button>
           </div>
-          <button class="btn btn-primary" id="s-run">检索</button>
+
+          <div class="doc search-box">
+            <div class="search-line">
+              <input id="s-query" type="text" placeholder="输入问题或关键词，例如：智能辅助驾驶传播表述">
+              <button class="text-btn" id="s-run" style="color:var(--green)">检索 ›</button>
+            </div>
+            <div class="filters" id="s-filters">
+              <button class="filter-btn active">全部</button>
+              <button class="filter-btn">技术说明</button>
+              <button class="filter-btn">发布会资料</button>
+              <button class="filter-btn">品牌口径</button>
+              <button class="filter-btn">媒体稿</button>
+            </div>
+          </div>
+
+          <div id="s-empty">
+            <div class="section-mark" style="margin-bottom:12px">常用查询</div>
+            <div class="doc quick-list">
+              <button class="quick-item" data-query="智能辅助驾驶 官方传播表述">
+                <span class="quick-main"><span class="quick-num">1</span><span class="quick-text">智能辅助驾驶官方传播表述</span></span>
+                <span class="quick-tag">高频</span>
+              </button>
+              <button class="quick-item" data-query="豪华座舱 社媒文案 传播重点">
+                <span class="quick-main"><span class="quick-num">2</span><span class="quick-text">豪华座舱社媒文案传播重点</span></span>
+                <span class="quick-tag">常用</span>
+              </button>
+              <button class="quick-item" data-query="车展发布会 媒体沟通稿">
+                <span class="quick-main"><span class="quick-num">3</span><span class="quick-text">车展发布会媒体沟通稿</span></span>
+                <span class="quick-tag">近期</span>
+              </button>
+              <button class="quick-item" data-query="品牌语气 术语表 风险词">
+                <span class="quick-main"><span class="quick-num">4</span><span class="quick-text">品牌语气、术语表和风险词</span></span>
+                <span class="quick-tag">常用</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="s-result"></div>
         </div>
-        <div class="panel right">
-          <div class="placeholder" id="s-result-ph"><div class="big">语义检索 + 规则重排</div>看每条结果为什么排在这里</div>
-          <div id="s-result" style="display:none;width:100%"></div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
+</div>
 
 <script>
-const API_BASE = "";
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const esc = (s="") => String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[m]));
 
-async function apiJSON(path, body){
-  const res = await fetch(API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-  const data = await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.detail || ("请求失败 ("+res.status+")"));
-  return data;
-}
-async function apiUpload(path, file){
-  const fd=new FormData(); fd.append("file",file);
-  const res=await fetch(API_BASE+path,{method:"POST",body:fd});
-  const data=await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.detail || ("上传失败 ("+res.status+")"));
-  return data;
-}
-function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
-function loadingHTML(m){return `<div class="loading"><div class="spinner"></div>${esc(m||"处理中…")}</div>`;}
-function errHTML(m){return `<div class="err">出错了：${esc(m)}</div>`;}
-function renderText(text){
-  const lines=(text||"").split("\n"); let html='<div class="rt">',inList=false;
-  const close=()=>{if(inList){html+="</ul>";inList=false;}};
-  for(let raw of lines){const line=raw.trim();
-    if(!line){close();continue;}
-    if(line.startsWith("【")&&line.endsWith("】")){close();html+=`<h3>${esc(line.slice(1,-1))}</h3>`;continue;}
-    if(/^[\u4e00-\u9fa5（）()0-9A-Za-z]{2,14}：\s*$/.test(line)){close();html+=`<h3>${esc(line.replace(/：\s*$/,""))}</h3>`;continue;}
-    if(/^[-•*]\s/.test(line)||/^\d+[.、]\s*/.test(line)){if(!inList){html+="<ul>";inList=true;}
-      html+=`<li>${esc(line.replace(/^[-•*]\s/,"").replace(/^\d+[.、]\s*/,""))}</li>`;continue;}
-    close();html+=`<p>${esc(line)}</p>`;}
-  close();return html+"</div>";
-}
+const modeNames = {
+  generate:["传播内容生成","生成"],
+  review:["稿件审校改写","审校"],
+  search:["知识库检索","检索"],
+};
 
-/* ---------- 导航 ---------- */
-function showView(name){
-  document.getElementById("home").style.display = name==="home"?"block":"none";
-  document.querySelectorAll(".view").forEach(v=>v.style.display="none");
-  if(name!=="home"){const el=document.getElementById("view-"+name); el.style.display="block";
-    el.classList.remove("fade"); void el.offsetWidth; el.classList.add("fade");}
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-function goHome(){showView("home");}
-function enterTask(name){showView(name);}
+const state = {
+  mode:"generate",
+  reviewMode:"check",
+  uploadedText:"",
+  sourceName:"",
+  terms:null,
+  currentResult:"",
+};
 
-/* ---------- 例子 chips ---------- */
-const GEN_EGS=[
-  "为旗舰纯电轿车 NOVA S9 全球首发写一版传播提案",
-  "围绕智能 SUV NOVA X7 的智能驾驶亮点，写一组媒体沟通要点",
-  "为纯电 MPV NOVA V9 上市写传播主题和社媒文案"
-];
-const SEARCH_EGS=["NOVA S9 传播亮点","NOVA X7 智能驾驶","NOVA V9 上市信息"];
-function buildChips(containerId, list, onPick){
-  const c=document.getElementById(containerId);
-  c.innerHTML=list.map(t=>`<span class="chip">${esc(t)}</span>`).join("");
-  [...c.children].forEach((el,i)=>el.onclick=()=>onPick(list[i]));
-}
-buildChips("g-chips", GEN_EGS, t=>{document.getElementById("g-query").value=t;});
-buildChips("s-chips", SEARCH_EGS, t=>{document.getElementById("s-query").value=t; document.getElementById("s-run").click();});
-
-const SAMPLE_DRAFT="星航NOVA S9今天正式发布，这款车搭载了超大的中控屏幕，内饰用了很多真皮材料，动力非常强劲，是星航史上最豪华的旗舰轿车。新车将于近期上市，价格预计很有竞争力，相信一定会大卖。";
-document.getElementById("r-sample").onclick=()=>{document.getElementById("r-text").value=SAMPLE_DRAFT;};
-
-/* ---------- 后端探活 ---------- */
-(async()=>{try{const r=await fetch(API_BASE+"/api/health");
-  if(r.ok){document.getElementById("status").classList.add("ok");
-    document.getElementById("statusText").textContent="后端已连接";}}
-  catch(e){document.getElementById("statusText").textContent="后端未连接 · 请确认 uvicorn 在运行";}})();
-
-/* ====================== 生成提案 ====================== */
-const G={uploadedText:null,sourceName:null,terms:null,currentResult:null};
-document.getElementById("g-file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  const n=document.getElementById("g-file-name");n.textContent="读取中…";
-  try{const d=await apiUpload("/api/upload/read",f);G.uploadedText=d.text;G.sourceName=d.source_name;
-    n.textContent="✓ "+d.source_name;n.classList.add("has");}catch(err){n.textContent="读取失败："+err.message;}};
-document.getElementById("g-terms").onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  const n=document.getElementById("g-terms-name");n.textContent="解析中…";
-  try{const d=await apiUpload("/api/upload/terms",f);G.terms=d.terms;
-    n.textContent="✓ "+Object.keys(d.terms).length+" 条术语";n.classList.add("has");}catch(err){n.textContent="解析失败："+err.message;}};
-document.getElementById("g-run").onclick=async()=>{
-  const query=document.getElementById("g-query").value.trim();const box=document.getElementById("g-result");
-  if(!query){box.innerHTML=errHTML("请先填写传播需求，或点上方的例子");return;}
-  box.innerHTML=loadingHTML("正在生成（先策略、后交付，约十几秒）…");
-  try{const d=await apiJSON("/api/generate",{query,top_k:5,extra_terms:G.terms,uploaded_text:G.uploadedText,source_name:G.sourceName});
-    G.currentResult=d.result;renderGenerate(d.stage1,d.stage2);}catch(err){box.innerHTML=errHTML(err.message);}};
-function renderGenerate(stage1,stage2){
-  const box=document.getElementById("g-result");let html="";
-  if(stage1)html+=`<div class="result-block"><span class="stage-tag">第一步 · 传播策略骨架</span>${renderText(stage1)}</div>`;
-  html+=`<div class="result-block"><span class="stage-tag">第二步 · 具体交付内容</span>${renderText(stage2||"")}
-    <div class="section-tools">
-      <button class="btn btn-ghost" data-sec="angles">重写 · 传播方向</button>
-      <button class="btn btn-ghost" data-sec="titles">重写 · 媒体标题</button>
-      <button class="btn btn-ghost" data-sec="social">重写 · 社媒文案</button></div></div>
-    <div class="refine-bar"><div class="field"><div class="label">补充要求后整体优化</div>
-      <input type="text" id="g-refine-input" placeholder="例如：第二步语气更克制、突出科技感"></div>
-      <button class="btn btn-ghost" id="g-refine-btn" style="padding:13px 18px">优化</button></div>
-    <div class="export-bar">
-      <button class="btn btn-ghost" id="g-copy">📋 复制全文</button>
-      <button class="btn btn-ghost" data-exp="docx">导出 Word</button>
-      <button class="btn btn-ghost" data-exp="md">导出 Markdown</button>
-      <button class="btn btn-ghost" data-exp="txt">导出 txt</button></div>`;
-  box.innerHTML=html;bindGenerateResultEvents();
-}
-function bindGenerateResultEvents(){
-  const query=document.getElementById("g-query").value.trim();
-  document.querySelectorAll("#g-result [data-sec]").forEach(b=>{b.onclick=async()=>{
-    const box=document.getElementById("g-result"),old=box.innerHTML;box.innerHTML=loadingHTML("正在重写该部分…");
-    try{const d=await apiJSON("/api/generate/regenerate-section",{section_key:b.dataset.sec,query,current_result:G.currentResult,top_k:5,extra_terms:G.terms,uploaded_text:G.uploadedText,source_name:G.sourceName});
-      G.currentResult=d.result;const[s1,s2]=splitTwoStage(d.result);renderGenerate(s1,s2);}catch(err){box.innerHTML=old;alert("重写失败："+err.message);}};});
-  document.getElementById("g-refine-btn").onclick=async()=>{
-    const ins=document.getElementById("g-refine-input").value.trim();if(!ins){alert("请先填写补充要求");return;}
-    const box=document.getElementById("g-result");box.innerHTML=loadingHTML("正在按要求优化…");
-    try{const d=await apiJSON("/api/refine",{mode:"generate",current_result:G.currentResult,instruction:ins});
-      G.currentResult=d.result;const[s1,s2]=splitTwoStage(d.result);renderGenerate(s1,s2);}catch(err){box.innerHTML=errHTML(err.message);}};
-  document.querySelectorAll("#g-result [data-exp]").forEach(b=>{b.onclick=()=>downloadExport(G.currentResult,b.dataset.exp);});
-  const gc=document.getElementById("g-copy");if(gc)gc.onclick=()=>copyText(getDeliveryForCopy(G.currentResult),gc);
-}
-// 复制时优先只复制"第二步·具体交付内容"（公关真正要粘出去用的部分）；没有分段就复制全文。
-function getDeliveryForCopy(text){const[,s2]=splitTwoStage(text||"");return(s2||text||"").trim();}
-async function copyText(text,btn){
-  try{await navigator.clipboard.writeText(text);}
-  catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();}
-  if(btn){const old=btn.textContent;btn.textContent="✓ 已复制";setTimeout(()=>btn.textContent=old,1500);}
-}
-function splitTwoStage(text){
-  if(text.includes("【第一步｜传播策略骨架】")&&text.includes("【第二步｜具体交付内容】")){
-    const p=text.split("【第二步｜具体交付内容】");return[p[0].replace("【第一步｜传播策略骨架】","").trim(),p[1].trim()];}
-  return[null,text];
-}
-async function downloadExport(text,fmt){
-  try{const res=await fetch(API_BASE+"/api/export",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text,format:fmt,title:"PR Agent 导出结果"})});
-    if(!res.ok)throw new Error("导出失败");const blob=await res.blob();const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");a.href=url;a.download="pr_agent_output."+fmt;a.click();URL.revokeObjectURL(url);}
-  catch(err){alert(err.message);}
-}
-
-/* ====================== 审稿改写 ====================== */
-let rMode="check";
-document.querySelectorAll("#r-mode button").forEach(b=>{b.onclick=()=>{
-  document.querySelectorAll("#r-mode button").forEach(x=>x.classList.remove("on"));b.classList.add("on");rMode=b.dataset.mode;};});
-document.getElementById("r-file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  const n=document.getElementById("r-file-name");n.textContent="读取中…";
-  try{const d=await apiUpload("/api/upload/read",f);document.getElementById("r-text").value=d.text;
-    n.textContent="✓ 已导入 "+d.source_name;n.classList.add("has");}catch(err){n.textContent="读取失败："+err.message;}};
-document.getElementById("r-run").onclick=async()=>{
-  const text=document.getElementById("r-text").value.trim();
-  const ph=document.getElementById("r-result-ph"),box=document.getElementById("r-result");
-  if(!text){ph.style.display="none";box.style.display="block";box.innerHTML=errHTML("请先粘贴/导入原稿，或点上方示例");return;}
-  ph.style.display="none";box.style.display="block";box.innerHTML=loadingHTML("正在处理…");
-  try{const d=await apiJSON("/api/refine-doc",{mode:rMode,source_text:text,instruction:document.getElementById("r-instruction").value.trim(),extra_terms:null});
-    box.innerHTML=`<span class="stage-tag">处理结果</span>`+renderText(d.result)+
-      `<div class="export-bar"><button class="btn btn-ghost" id="r-copy">📋 复制全文</button><button class="btn btn-ghost" data-rexp="docx">导出 Word</button><button class="btn btn-ghost" data-rexp="txt">导出 txt</button></div>`;
-    box.querySelectorAll("[data-rexp]").forEach(b=>b.onclick=()=>downloadExport(d.result,b.dataset.rexp));
-    const rc=document.getElementById("r-copy");if(rc)rc.onclick=()=>copyText((d.result||"").trim(),rc);}
-  catch(err){box.innerHTML=errHTML(err.message);}};
-
-/* ====================== 知识检索 ====================== */
-// 从得分构成里挑出"贡献最大的那个重排维度"，让用户一眼看到这条为什么排前面。
-// 只看加分项（排除语义分本身和总分），加分大于 0 才显示。
-function topReason(bd){
-  const skip={"语义分":1,"总分":1};
-  let best=null,bestV=0;
-  for(const[k,v]of Object.entries(bd)){
-    if(skip[k])continue;
-    const n=typeof v==="number"?v:parseFloat(v);
-    if(!isNaN(n)&&n>bestV){bestV=n;best=k;}
+async function apiJSON(url, body){
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){
+    let msg = await res.text();
+    try{ msg = JSON.parse(msg).detail || msg; }catch(e){}
+    throw new Error(msg || `HTTP ${res.status}`);
   }
-  return bestV>0?best:null;
+  return res.json();
 }
-document.getElementById("s-run").onclick=async()=>{
-  const query=document.getElementById("s-query").value.trim();const k=parseInt(document.getElementById("s-k").value)||5;
-  const ph=document.getElementById("s-result-ph"),box=document.getElementById("s-result");
-  if(!query){ph.style.display="none";box.style.display="block";box.innerHTML=errHTML("请输入检索内容，或点上方例子");return;}
-  ph.style.display="none";box.style.display="block";box.innerHTML=loadingHTML("检索中…");
-  try{const d=await apiJSON("/api/search",{query,k});const results=d.results||[];
-    if(!results.length){box.innerHTML=`<div class="placeholder">没有命中结果</div>`;return;}
-    box.innerHTML=`<span class="stage-tag">${results.length} 条结果</span>`+results.map(r=>{
-      const bd=r.score_breakdown||{};const rows=Object.entries(bd).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join("");
-      const why=topReason(bd);
-      return `<div class="hit"><div class="hit-top">
-        <span class="badge model">${esc(r.car_model||"未标车型")}</span>
-        ${r.doc_type?`<span class="badge">${esc(r.doc_type)}</span>`:""}
-        ${r.version_date?`<span class="badge">${esc(r.version_date)}</span>`:""}
-        ${why?`<span class="badge why">✓ ${esc(why)}</span>`:""}
-        <span class="score">综合分 ${r.rerank_score!=null?r.rerank_score.toFixed(3):"-"}</span></div>
-        <div class="hit-text">${esc((r.text||"").slice(0,220))}${(r.text||"").length>220?"…":""}</div>
-        ${rows?`<details class="breakdown"><summary>得分构成</summary><table>${rows}</table></details>`:""}</div>`;
-    }).join("");}
-  catch(err){box.innerHTML=errHTML(err.message);}};
+
+async function apiUpload(url, file){
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(url, {method:"POST", body:fd});
+  if(!res.ok){
+    let msg = await res.text();
+    try{ msg = JSON.parse(msg).detail || msg; }catch(e){}
+    throw new Error(msg || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+function selectValue(id){ return $(`#${id}`)?.value || ""; }
+function nowText(){ return new Date().toLocaleString("zh-CN", {hour12:false}); }
+function briefPrefix(prefix){
+  return [
+    `内容类型：${selectValue(`${prefix}-content-type`)}`,
+    `品牌：${selectValue(`${prefix}-brand`)}`,
+    `语气：${selectValue(`${prefix}-tone`)}`,
+    `目标：${selectValue(`${prefix}-goal`)}`,
+  ].join("\n");
+}
+function loadingHTML(label="正在整理稿件"){
+  return `<div class="loading"><div class="skeleton"><div class="sk-line big"></div><div class="sk-line mid"></div><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line short"></div><p style="margin-top:8px">${esc(label)}...</p></div></div>`;
+}
+function readableError(err){
+  const msg = String(err?.message || err || "");
+  if(msg.includes("Failed to fetch")){
+    return "无法连接后端。请从 http://127.0.0.1:8000 打开页面后再使用生成、审校或检索功能。";
+  }
+  if(msg.includes("NetworkError")){
+    return "网络连接失败，请确认后端服务已经启动。";
+  }
+  return msg || "操作失败，请稍后再试。";
+}
+function errHTML(err){ return `<div class="err">${esc(readableError(err))}</div>`; }
+
+function setMode(mode){
+  state.mode = mode;
+  $$(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.mode === mode));
+  $$(".mode-panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${mode}`));
+  $("#crumbMode").textContent = modeNames[mode][0];
+  $("#modeMeta").textContent = modeNames[mode][1];
+}
+
+$$(".nav-btn").forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
+$$("[data-preset-mode]").forEach(btn => btn.addEventListener("click", () => {
+  const mode = btn.dataset.presetMode;
+  setMode(mode);
+  if(mode === "generate") $("#g-query").value = btn.dataset.preset;
+  if(mode === "review") $("#r-text").value = btn.dataset.preset;
+  if(mode === "search") $("#s-query").value = btn.dataset.preset;
+}));
+
+fetch("/api/health")
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(() => { $("#statusText").textContent = "已同步"; $("#kbCount").textContent = "在线"; })
+  .catch(() => { $("#statusText").textContent = "离线"; $("#kbCount").textContent = "本地"; });
+
+const examples = [
+  "为纯电车型上市写一版传播方向和社媒文案",
+  "围绕智能辅助驾驶，整理媒体沟通重点",
+  "为豪华品牌发布会写标题、导语和新闻稿框架",
+];
+$("#g-chips").innerHTML = examples.map(x => `<button class="chip" type="button">${esc(x)}</button>`).join("");
+$$(".chip", $("#g-chips")).forEach(chip => chip.addEventListener("click", () => $("#g-query").value = chip.textContent));
+$("#g-fill").addEventListener("click", () => {
+  $("#g-query").value = "为全新豪华纯电 SUV 上市发布生成传播内容，重点突出智能辅助驾驶、豪华座舱、长途舒适性和品牌信任感，面向汽车垂媒、科技媒体和社交平台。";
+});
+$("#g-reset").addEventListener("click", () => {
+  $("#g-query").value = "";
+  state.uploadedText = "";
+  state.sourceName = "";
+  state.terms = null;
+  state.currentResult = "";
+  $("#g-file-name").textContent = "未上传文件";
+  $("#g-file-name").classList.remove("has");
+  $("#g-terms-name").textContent = "可选";
+  $("#g-terms-name").classList.remove("has");
+  $("#g-result").innerHTML = `<div class="empty">生成结果会出现在这里，结构会按标题、导语、正文和社媒文案拆开。</div>`;
+});
+
+$("#g-file").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  $("#g-file-name").textContent = "读取中...";
+  try{
+    const data = await apiUpload("/api/upload/read", file);
+    state.uploadedText = data.text || "";
+    state.sourceName = data.source_name || file.name;
+    $("#g-file-name").textContent = state.sourceName;
+    $("#g-file-name").classList.add("has");
+  }catch(err){
+    $("#g-file-name").textContent = err.message;
+  }
+});
+
+$("#g-terms").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  $("#g-terms-name").textContent = "读取中...";
+  try{
+    const data = await apiUpload("/api/upload/terms", file);
+    state.terms = data.terms || {};
+    $("#g-terms-name").textContent = `${file.name} · ${Object.keys(state.terms).length} 个术语`;
+    $("#g-terms-name").classList.add("has");
+  }catch(err){
+    $("#g-terms-name").textContent = err.message;
+  }
+});
+
+function renderText(text){
+  const lines = String(text || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
+  if(!lines.length) return "<p>暂无内容。</p>";
+  let html = "";
+  for(const line of lines){
+    const clean = line.replace(/^#+\s*/, "");
+    if(/^(一、|二、|三、|四、|五、|传播方向|标题|导语|正文|社媒|小红书|微博|风险|建议)/.test(clean)){
+      html += `<h3>${esc(clean)}</h3>`;
+    }else if(/^[-*]\s+/.test(clean)){
+      html += `<ul><li>${esc(clean.replace(/^[-*]\s+/, ""))}</li></ul>`;
+    }else{
+      html += `<p>${esc(clean)}</p>`;
+    }
+  }
+  return html.replace(/<\/ul><ul>/g, "");
+}
+
+function splitTitle(text){
+  const lines = String(text || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
+  const title = lines.find(l => !/^(一、|二、|三、|四、|传播方向|标题|导语|正文|社媒|[-*])/.test(l)) || "PR Agent 传播内容初稿";
+  const subtitle = lines.find(l => l !== title && l.length > 8 && l.length < 42) || "基于传播需求、知识库与品牌语气生成";
+  return {title, subtitle};
+}
+
+function renderGenerate(text){
+  state.currentResult = text || "";
+  const {title, subtitle} = splitTitle(text);
+  $("#g-result").innerHTML = `
+    <div class="result-head">
+      <div>
+        <div class="section-mark red">传播初稿</div>
+        <div class="doc-meta" style="margin-top:12px">
+          <span>${esc(nowText())}</span>
+          <span>${esc(state.sourceName || "手动输入")}</span>
+          <span>${esc(selectValue("g-content-type"))}</span>
+        </div>
+      </div>
+      <div class="toolbar">
+        <span class="stamp" style="--stamp-color:var(--red)">初稿</span>
+        <button class="text-btn" data-copy="generate">复制</button>
+        <button class="text-btn" data-export="docx">导出 Word</button>
+        <button class="text-btn" data-refine>继续修改</button>
+      </div>
+    </div>
+    <div class="release-title">
+      <h1>${esc(title)}</h1>
+      <p>${esc(subtitle)}</p>
+    </div>
+    <div class="rt">${renderText(text)}</div>
+  `;
+}
+
+$("#g-run").addEventListener("click", async () => {
+  const q = $("#g-query").value.trim();
+  if(!q){ $("#g-result").innerHTML = errHTML("请先输入传播 brief。"); return; }
+  $("#g-result").innerHTML = loadingHTML("正在生成文档稿");
+  try{
+    const fullQuery = `${briefPrefix("g")}\n\n传播需求：\n${q}`;
+    const data = await apiJSON("/api/generate", {
+      query: fullQuery,
+      top_k: 5,
+      extra_terms: state.terms,
+      uploaded_text: state.uploadedText,
+      source_name: state.sourceName,
+    });
+    renderGenerate(data.result || data.stage2 || "");
+  }catch(err){
+    $("#g-result").innerHTML = errHTML(err);
+  }
+});
+
+document.addEventListener("click", async e => {
+  const copyBtn = e.target.closest("[data-copy]");
+  if(copyBtn){
+    const text = copyBtn.dataset.copy === "review" ? state.reviewResult : state.currentResult;
+    if(text) await navigator.clipboard.writeText(text);
+    copyBtn.textContent = "已复制";
+    setTimeout(() => copyBtn.textContent = "复制", 1500);
+  }
+  const exportBtn = e.target.closest("[data-export]");
+  if(exportBtn){
+    const text = state.currentResult || state.reviewResult || "";
+    if(!text) return;
+    try{
+      const res = await fetch("/api/export", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({text, format:exportBtn.dataset.export, title:"PR Agent 导出结果"})
+      });
+      if(!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `pr-agent-result.${exportBtn.dataset.export}`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }catch(err){ alert(err.message || err); }
+  }
+  if(e.target.closest("[data-refine]")){
+    setMode("review");
+    $("#r-text").value = state.currentResult || "";
+  }
+});
+
+$("#r-mode").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-mode]");
+  if(!btn) return;
+  $$("#r-mode button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  state.reviewMode = btn.dataset.mode;
+});
+$("#r-sample").addEventListener("click", () => {
+  $("#r-text").value = "新款车型配备了行业领先的自动驾驶功能，这项颠覆性技术将在近期发布，足以吊打竞品，为用户带来前所未有的驾驶体验。";
+});
+$("#r-file").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  $("#r-file-name").textContent = "读取中...";
+  try{
+    const data = await apiUpload("/api/upload/read", file);
+    $("#r-text").value = data.text || "";
+    $("#r-file-name").textContent = data.source_name || file.name;
+    $("#r-file-name").classList.add("has");
+  }catch(err){
+    $("#r-file-name").textContent = err.message;
+  }
+});
+function bindIssueClicks(){
+  $$("[data-issue]").forEach(el => el.addEventListener("click", e => {
+    const id = e.currentTarget.dataset.issue;
+    $$("[data-issue]").forEach(x => x.classList.toggle("active", x.dataset.issue === id && !x.classList.contains("active")));
+  }));
+}
+bindIssueClicks();
+
+$("#r-run").addEventListener("click", async () => {
+  const text = $("#r-text").value.trim();
+  if(!text){ $("#r-result").innerHTML = errHTML("请先粘贴或导入稿件。"); return; }
+  $("#r-result").innerHTML = loadingHTML("正在审校稿件");
+  try{
+    const instruction = [
+      briefPrefix("r"),
+      $("#r-instruction").value.trim()
+    ].filter(Boolean).join("\n");
+    const data = await apiJSON("/api/refine-doc", {
+      mode: state.reviewMode,
+      source_text: text,
+      instruction,
+      extra_terms: state.terms,
+    });
+    state.reviewResult = data.result || "";
+    $("#r-result").innerHTML = `
+      <div class="result-head">
+        <div>
+          <div class="section-mark amber">审校结果</div>
+          <div class="doc-meta" style="margin-top:12px"><span>${esc(nowText())}</span><span>${esc(state.reviewMode)}</span></div>
+        </div>
+        <div class="toolbar">
+          <span class="stamp" style="--stamp-color:var(--amber)">已审校</span>
+          <button class="text-btn" data-copy="review">复制</button>
+          <button class="text-btn" data-export="docx">导出 Word</button>
+        </div>
+      </div>
+      <div class="rt">${renderText(state.reviewResult)}</div>
+    `;
+  }catch(err){
+    $("#r-result").innerHTML = errHTML(err);
+  }
+});
+
+$("#s-filters").addEventListener("click", e => {
+  const btn = e.target.closest(".filter-btn");
+  if(!btn) return;
+  $$(".filter-btn", $("#s-filters")).forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+});
+$$(".quick-item").forEach(btn => btn.addEventListener("click", () => {
+  $("#s-query").value = btn.dataset.query;
+  runSearch();
+}));
+$("#s-reset").addEventListener("click", () => {
+  $("#s-query").value = "";
+  $("#s-result").innerHTML = "";
+  $("#s-empty").style.display = "";
+});
+$("#s-run").addEventListener("click", runSearch);
+$("#s-query").addEventListener("keydown", e => { if(e.key === "Enter") runSearch(); });
+
+async function runSearch(){
+  const query = $("#s-query").value.trim();
+  if(!query) return;
+  $("#s-empty").style.display = "none";
+  $("#s-result").innerHTML = loadingHTML("正在检索知识库");
+  try{
+    const data = await apiJSON("/api/search", {query, k:5});
+    const results = data.results || [];
+    if(!results.length){
+      $("#s-result").innerHTML = `<div class="doc"><div class="empty">没有找到匹配资料。可以换一个更具体的车型、技术名或传播场景。</div></div>`;
+      return;
+    }
+    $("#s-result").innerHTML = `
+      <div class="section-mark green" style="margin-bottom:12px">${results.length} 条结果 · 按相关度排序</div>
+      ${results.map((r,i) => {
+        const score = Math.round((r.score || r.final_score || r.semantic_score || 0) * 100);
+        const safeScore = Number.isFinite(score) && score > 0 ? Math.min(score, 99) : Math.max(72, 96 - i * 6);
+        const color = i === 0 ? "var(--green)" : i === 1 ? "var(--amber)" : "var(--muted)";
+        const title = r.title || r.source || r.file || `资料片段 ${i + 1}`;
+        const text = r.text || r.content || r.chunk || r.excerpt || "";
+        return `
+          <div class="hit" style="--hit-color:${color}">
+            <button class="hit-main" type="button">
+              <div class="rel"><div class="rel-num" style="color:${color}">${safeScore}</div><div class="rel-label">%</div><div class="rel-line"><div class="rel-fill" style="width:${safeScore}%"></div></div></div>
+              <div class="hit-content">
+                <div class="hit-top">
+                  <h3>${esc(title)}</h3>
+                  <div class="hit-tags"><span class="badge">${esc(r.type || r.category || "资料")}</span><span class="badge">${esc(r.date || r.source_name || "本地")}</span></div>
+                </div>
+                <p>${esc(text.slice(0, 120))}${text.length > 120 ? "..." : ""}</p>
+              </div>
+            </button>
+            <div class="hit-extra">
+              <button class="text-btn" data-hit-copy="${i}">复制片段</button>
+              <span class="file-name">${esc(text)}</span>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    `;
+    $$(".hit-main", $("#s-result")).forEach(btn => btn.addEventListener("click", () => btn.closest(".hit").classList.toggle("open")));
+    $$("[data-hit-copy]", $("#s-result")).forEach(btn => btn.addEventListener("click", async () => {
+      const text = btn.nextElementSibling?.textContent || "";
+      await navigator.clipboard.writeText(text);
+      btn.textContent = "已复制";
+      setTimeout(() => btn.textContent = "复制片段", 1500);
+    }));
+  }catch(err){
+    $("#s-result").innerHTML = errHTML(err);
+  }
+}
 </script>
 </body>
 </html>
