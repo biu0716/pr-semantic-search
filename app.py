@@ -19,6 +19,7 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
@@ -36,6 +37,8 @@ from services.export import get_export_payload
 
 
 app = FastAPI(title="PR Agent API", version="1.0")
+STATIC_DIR = Path(__file__).parent / "static"
+app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets", check_dir=False), name="assets")
 
 # 允许前端（比如 GitHub Pages 上的页面）跨域调用。
 # 上线后建议把 "*" 换成你前端的具体域名。

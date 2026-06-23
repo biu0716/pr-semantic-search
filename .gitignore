@@ -5,6 +5,10 @@
 __pycache__/
 *.pyc
 .DS_Store
+node_modules/
+frontend/node_modules/
+frontend/.vite/
+npm-debug.log*
 
 # ⚠️ 真实知识库（含客户内部资料）——绝不提交、绝不公开
 data/index.faiss

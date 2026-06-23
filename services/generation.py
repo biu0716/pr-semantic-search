@@ -173,6 +173,51 @@ def build_strategy_prompt(
 """.strip()
 
 
+def generate_pr_from_brief_only(
+    query: str,
+    strategy_result: str,
+    extra_terms: dict[str, str] | None = None,
+) -> str:
+    extra_terms = extra_terms or {}
+    query = apply_extra_term_rules(query, extra_terms)
+    terms_block = build_terms_prompt_block(extra_terms)
+
+    prompt = f"""
+你是一名服务汽车品牌的中国公关编辑，正在把用户 brief 转成可用的传播初稿。
+
+当前没有上传产品资料，因此你必须只围绕【用户需求】和【策略骨架】写作。
+
+【绝对禁止】
+1. 禁止引用、借用或虚构任何用户没有提到的品牌、车型、参数、配置、功能、价格、上市时间。
+2. 禁止出现与用户需求无关的车型名或品牌名。
+3. 禁止把知识库示例中的车型、卖点或参数迁移到本次稿件。
+4. 禁止使用“重新定义行业”“颠覆传统”“极致体验”等空泛或夸张表达。
+
+【写作要求】
+1. 如果缺少具体产品资料，新闻稿段落要写成框架性初稿，不要编造配置和参数。
+2. 传播方向必须是传播切口，不要写成“空间/智能/豪华/操控”这类卖点分类。
+3. 语言要像真实汽车 PR 初稿：克制、清楚、可交付。
+4. 如涉及术语，请优先遵循术语表。
+
+{terms_block}
+
+【用户需求】
+{query}
+
+【策略骨架】
+{strategy_result}
+
+【你只能输出以下五个部分，且必须按此顺序】
+传播主题：
+传播方向（3条）：
+导语：
+新闻稿段落：
+社媒文案（3条）：
+""".strip()
+
+    return call_llm(prompt).strip()
+
+
 # ==============================
 # 两阶段生成主流程
 # ==============================
@@ -203,30 +248,11 @@ def generate_pr_two_stage(
             extra_terms=extra_terms,
         )
     else:
-        try:
-            core_result = call_with_supported_kwargs(
-                generate_core_pr,
-                query,
-                top_k=top_k,
-            )
-            core_result = strip_titles_section(core_result)
-
-            title_result = call_with_supported_kwargs(
-                generate_titles,
-                query,
-                top_k=top_k,
-            )
-            title_result = clean_title_result(title_result)
-
-            delivery_result = f"{core_result}\n\n媒体标题（5条）：\n{title_result}"
-
-        except TypeError:
-            fallback_result = call_with_supported_kwargs(
-                generate_pr,
-                query,
-                top_k=top_k,
-            )
-            delivery_result = fallback_result
+        delivery_result = generate_pr_from_brief_only(
+            query=query,
+            strategy_result=strategy_result,
+            extra_terms=extra_terms,
+        )
 
     return f"""【第一步｜传播策略骨架】
 {strategy_result}
