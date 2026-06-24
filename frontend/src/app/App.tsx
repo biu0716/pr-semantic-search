@@ -279,7 +279,7 @@ function Sidebar({ mode, switchMode }: { mode: Mode; switchMode: (m: Mode) => vo
   ];
 
   return (
-    <aside className="flex flex-col shrink-0 h-full"
+    <aside className="hidden md:flex flex-col shrink-0 h-full"
       style={{ width: 196, backgroundColor: S_BG, borderRight: `1px solid ${S_BORDER}` }}>
 
       {/* Logo */}
@@ -415,8 +415,8 @@ function GenerateMode() {
   }
 
   return (
-    <div className="h-full overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-      <div className="max-w-[740px] mx-auto px-12 py-10">
+    <div className="h-full overflow-y-auto overflow-x-hidden" style={{ scrollbarWidth: "none" }}>
+      <div className="w-full mx-auto px-4 sm:px-8 lg:px-10 py-8 lg:py-10" style={{ maxWidth: "min(960px, calc(100vw - 32px))" }}>
 
         {/* Section header */}
         <div className="flex items-baseline gap-4 mb-7">
@@ -440,22 +440,24 @@ function GenerateMode() {
           {phase === "idle" && (
             <motion.div exit={{ opacity: 0, height: 0, marginBottom: 0 }}
               transition={{ duration: 0.35, ease: [0.22,1,0.36,1] }} className="mb-5">
-              <div className="bg-white border shadow-sm" style={{ borderColor: BORDER }}>
-                <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: BORDER }}>
+              <div className="w-full max-w-full overflow-hidden bg-white border shadow-sm" style={{ borderColor: BORDER }}>
+                <div className="flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-b" style={{ borderColor: BORDER }}>
                   <SectionMark>BRIEF</SectionMark>
                   <div className="flex items-center gap-3">
-                    <span className="text-[9px]" style={{ ...MONO, color: brief.length > 20 ? RED : MUTED }}>{brief.length} CHARS</span>
-                    <Stamp label="需求录入" color={RED} />
+                    <span className="hidden sm:inline text-[9px]" style={{ ...MONO, color: brief.length > 20 ? RED : MUTED }}>{brief.length} CHARS</span>
+                    <span className="hidden sm:inline-flex">
+                      <Stamp label="需求录入" color={RED} />
+                    </span>
                   </div>
                 </div>
-                <div className="grid border-b" style={{ gridTemplateColumns: "repeat(4,minmax(0,1fr))", borderColor: BORDER }}>
+                <div className="grid border-b" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", borderColor: BORDER }}>
                   {[
                     ["内容类型", contentType, setContentType, ["新闻稿", "社媒文案", "邀请函", "标题", "传播方向", "完整初稿"]],
                     ["品牌", brand, setBrand, ["Mercedes-Benz", "BMW", "MINI", "其他 / 待确认"]],
                     ["语气", tone, setTone, ["正式", "社媒化", "顾问感", "更像人话"]],
                     ["目标", goal, setGoal, ["生成", "改写", "统一口径"]],
                   ].map(([label, value, setter, options]) => (
-                    <div key={label as string} className="px-4 py-3 border-r last:border-r-0" style={{ borderColor: BORDER }}>
+                    <div key={label as string} className="px-4 sm:px-5 py-4 border-r last:border-r-0" style={{ borderColor: BORDER }}>
                       <span className="block text-[8px] uppercase tracking-widest mb-2" style={{ ...MONO, color: MUTED }}>{label as string}</span>
                       <select
                         value={value as string}
@@ -467,22 +469,22 @@ function GenerateMode() {
                       </div>
                   ))}
                 </div>
-                <div className="flex justify-between gap-4 px-6 pt-4 text-[8px] tracking-[0.18em] uppercase" style={{ ...MONO, color: MUTED }}>
+                <div className="flex justify-between gap-4 px-5 sm:px-7 pt-5 text-[8px] tracking-[0.18em] uppercase" style={{ ...MONO, color: MUTED }}>
                   <span>这些分类会写入 brief，不会被隐藏成默认 prompt</span>
-                  <span>Content / Brand / Tone / Goal</span>
+                  <span className="hidden sm:inline">Content / Brand / Tone / Goal</span>
                 </div>
                 <textarea value={brief} onChange={e => setBrief(e.target.value)}
                   placeholder={"描述传播需求……\n\n例如：为梅赛德斯-奔驰全新纯电 GLC 生成上市新闻稿，重点突出产品序列进入纯电时代、豪华品牌电动化与媒体沟通切口。"}
-                  className="w-full h-28 bg-transparent resize-none focus:outline-none text-sm leading-relaxed px-6 py-4 placeholder:text-muted-foreground/30"
+                  className="w-full h-48 bg-transparent resize-none focus:outline-none text-[15px] leading-relaxed px-5 sm:px-7 py-5 placeholder:text-muted-foreground/30"
                   style={{ ...SERIF, color: INK }} />
-                <div className="flex items-center justify-between px-6 py-3 border-t" style={{ borderColor: BORDER }}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-7 py-4 border-t" style={{ borderColor: BORDER }}>
                   <button className="text-xs transition-colors hover:opacity-70" style={{ color: MUTED }}
                     onClick={() => setBrief("为梅赛德斯-奔驰全新纯电 GLC 生成上市新闻稿，重点突出产品序列进入纯电时代、豪华品牌电动化与媒体沟通切口。")}>
                     填入示例 →
                   </button>
                   <motion.button onClick={runGenerate} disabled={!brief.trim()}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                    className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
+                    className="flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
                     style={{ ...SANS, backgroundColor: RED,
                       clipPath: "polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))" }}>
                     <Zap size={13} />生成传播内容
@@ -927,7 +929,7 @@ export default function App() {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-8 shrink-0 bg-white/50 backdrop-blur-sm"
+        <div className="flex items-center justify-between px-4 md:px-8 shrink-0 bg-white/50 backdrop-blur-sm"
           style={{ height: 42, borderBottom: `1px solid ${BORDER}` }}>
           <div className="flex items-center gap-2">
             <span className="text-[9px]" style={{ ...MONO, color: MUTED }}>PR Agent</span>
@@ -938,7 +940,7 @@ export default function App() {
               {mode === "generate" ? "传播内容生成" : mode === "review" ? "稿件审校改写" : "知识库检索"}
             </span>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="hidden sm:flex items-center gap-5">
             {[["MODE", mode.toUpperCase()], ["KB", "local"], ["VER", "beta"]].map(([k, v]) => (
               <div key={k} className="flex items-center gap-1.5">
                 <span className="text-[7px] tracking-widest" style={{ ...MONO, color: MUTED }}>{k}</span>
